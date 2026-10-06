@@ -1,0 +1,100 @@
+/* In-card quick add: slides up from the bottom of the photo on desktop hover */
+
+.card-wrapper .card__inner:has(> .card-quick-add) {
+	position: relative;
+	overflow: hidden;
+	/* Sit above the stretched product-title link (::after z-index: 1) */
+	z-index: 2;
+	/* Let photo clicks reach the title link; only the panel captures events */
+	pointer-events: none;
+}
+
+.card-quick-add {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 3;
+	padding: 0.75rem;
+	background: linear-gradient(
+		to top,
+		rgba(var(--color-background), 0.96) 55%,
+		rgba(var(--color-background), 0.88)
+	);
+	pointer-events: auto;
+}
+
+.card-quick-add__form {
+	display: grid;
+	gap: 0.55rem;
+}
+
+.card-quick-add__options {
+	display: grid;
+	gap: 0.4rem;
+}
+
+.card-quick-add__option {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+
+.card-quick-add__values {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+.card-quick-add__chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1 1 0;
+	min-width: 0;
+	min-height: 3.2rem;
+	padding: 0.5rem 0.75rem;
+	border: 0.1rem solid rgba(var(--color-foreground), 0.2);
+	border-radius: 0.4rem;
+	background: rgb(var(--color-background));
+	color: rgb(var(--color-foreground));
+	font-size: 1.35rem;
+	font-weight: 500;
+	line-height: 1.2;
+	text-align: center;
+	cursor: pointer;
+	transition:
+		border-color 0.15s ease,
+		background-color 0.15s ease;
+}
+
+.card-quick-add__radio:checked + .card-quick-add__chip {
+	border-color: rgba(var(--color-foreground), 0.9);
+	background: rgba(var(--color-foreground), 0.06);
+}
+
+.card-quick-add__radio:focus-visible + .card-quick-add__chip {
+	outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
+	outline-offset: 0.1rem;
+}
+
+.card-quick-add__submit {
+	min-height: 3.6rem;
+	margin: 0;
+}
+
+@media screen and (min-width: 990px) {
+	.card-quick-add {
+		transform: translateY(100%);
+		pointer-events: none;
+		transition: transform 0.28s ease;
+	}
+
+	.card-wrapper:hover .card-quick-add,
+	.card-wrapper:focus-within .card-quick-add {
+		transform: translateY(0);
+		pointer-events: auto;
+	}
+}

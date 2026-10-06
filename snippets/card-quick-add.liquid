@@ -1,0 +1,105 @@
+{% comment %}
+	In-card quick add panel (hover on desktop, always visible on small screens).
+
+	Accepts:
+	- card_product: {Object} Product Liquid object
+	- section_id: {String} Section id for unique form ids
+{% endcomment %}
+{%- liquid
+	assign product_form_id = 'quick-add-' | append: section_id | append: card_product.id
+	assign current_variant = card_product.selected_or_first_available_variant
+-%}
+<card-quick-add class="card-quick-add no-js-hidden">
+	<product-form data-section-id="{{ section_id }}" data-hide-errors="true">
+		{%- form 'product',
+			card_product,
+			id: product_form_id,
+			class: 'card-quick-add__form form',
+			novalidate: 'novalidate',
+			data-type: 'add-to-cart-form'
+		-%}
+			<input
+				type="hidden"
+				name="id"
+				value="{{ current_variant.id }}"
+				class="product-variant-id"
+				{% if current_variant.available == false %}
+					disabled
+				{% endif %}
+			>
+
+			{%- if card_product.variants_count > 1 -%}
+				<script type="application/json" data-card-variants>
+					[
+						{%- for variant in card_product.variants -%}
+							{
+								"id": {{ variant.id | json }},
+								"available": {{ variant.available | json }},
+								"options": {{ variant.options | json }}
+							}{%- unless forloop.last -%},{%- endunless -%}
+						{%- endfor -%}
+					]
+				</script>
+
+				<div class="card-quick-add__options">
+					{%- for option in card_product.options_with_values -%}
+						<fieldset
+							class="card-quick-add__option"
+							data-option-index="{{ forloop.index0 }}"
+						>
+							<legend class="visually-hidden">{{ option.name }}</legend>
+							<div class="card-quick-add__values" role="list">
+								{%- for value in option.values -%}
+									{%- assign input_id = product_form_id
+										| append: '-option-'
+										| append: option.position
+										| append: '-'
+										| append: forloop.index0
+									-%}
+									<input
+										type="radio"
+										id="{{ input_id }}"
+										class="card-quick-add__radio visually-hidden"
+										name="{{ product_form_id }}-option-{{ option.position }}"
+										value="{{ value | escape }}"
+										{% if option.selected_value == value %}
+											checked
+										{% endif %}
+									>
+									<label class="card-quick-add__chip" for="{{ input_id }}">
+										{{ value }}
+									</label>
+								{%- endfor -%}
+							</div>
+						</fieldset>
+					{%- endfor -%}
+				</div>
+			{%- endif -%}
+
+			<button
+				id="{{ product_form_id }}-submit"
+				type="submit"
+				name="add"
+				class="card-quick-add__submit button button--full-width"
+				aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
+				aria-live="polite"
+				data-sold-out-message="true"
+				{% if current_variant.available == false %}
+					disabled
+				{% endif %}
+			>
+				<span
+					{% if current_variant.available == false %}
+						class="hidden"
+					{% endif %}
+				>
+					{{ 'products.product.add_to_cart' | t }}
+				</span>
+				<span class="sold-out-message{% if current_variant.available %} hidden{% endif %}">
+					{{ 'products.product.sold_out' | t }}
+				</span>
+				{%- render 'loading-spinner' -%}
+			</button>
+		{%- endform -%}
+	</product-form>
+</card-quick-add>

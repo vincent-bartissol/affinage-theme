@@ -65,6 +65,7 @@ jobs:
           echo "theme_id=${theme_id}" >> "${GITHUB_OUTPUT}"
 
       - name: Run Lighthouse
+        id: lhci
         env:
           SHOP_HOST: https://${{ steps.urls.outputs.store }}
           SHOP_PASSWORD: ${{ secrets.SHOP_PASSWORD_OS2 }}
@@ -79,6 +80,10 @@ jobs:
           const host = process.env.SHOP_HOST;
           const query = process.env.PREVIEW_QUERY;
           const product = process.env.PRODUCT_HANDLE;
+          const budgets = {
+            performance: 0.6,
+            accessibility: 0.9,
+          };
           const config = {
             ci: {
               collect: {
@@ -89,7 +94,7 @@ jobs:
                   `${host}/collections/all${query}`,
                   `${host}/cart${query}`,
                 ],
-                puppeteerScript: '.github/lighthouse/set-preview-cookies.js',
+                puppeteerScript: '.github/lighthouse/set-preview-cookies.cjs',
                 puppeteerLaunchOptions: {
                   executablePath: process.env.CHROME_PATH,
                   args: [
@@ -106,15 +111,195 @@ jobs:
               upload: { target: 'temporary-public-storage' },
               assert: {
                 assertions: {
-                  'categories:performance': ['error', { minScore: 0.6 }],
-                  'categories:accessibility': ['error', { minScore: 0.9 }],
+                  'categories:performance': ['error', { minScore: budgets.performance }],
+                  'categories:accessibility': ['error', { minScore: budgets.accessibility }],
                 },
               },
             },
           };
           fs.writeFileSync('lighthouserc.json', JSON.stringify(config, null, 2));
+          fs.writeFileSync('.lighthouse-budgets.json', JSON.stringify(budgets, null, 2));
           NODE
+
+          set +e
           pnpm dlx @lhci/cli@0.15.1 autorun --config=./lighthouserc.json
+          lhci_exit=$?
+          set -e
+
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const budgets = JSON.parse(fs.readFileSync('.lighthouse-budgets.json', 'utf8'));
+          const manifestPath = '.lighthouseci/manifest.json';
+          const assertionPath = '.lighthouseci/assertion-results.json';
+
+          const pct = (score) =>
+            score == null || Number.isNaN(score) ? 'n/a' : `${Math.round(score * 100)}`;
+          const shortUrl = (url) => {
+            try {
+              const u = new URL(url);
+              return `${u.pathname || '/'}${u.search ? '?…' : ''}`;
+            } catch {
+              return url;
+            }
+          };
+          const statusFor = (category, score) => {
+            const min = budgets[category];
+            if (min == null || score == null) return '—';
+            return score >= min ? 'PASS' : 'FAIL';
+          };
+
+          const lines = [];
+          const push = (line = '') => lines.push(line);
+
+          push('========================================');
+          push(' Lighthouse results');
+          push('========================================');
+          push('');
+          push('Budgets (minimum scores)');
+          push('------------------------');
+          for (const [category, min] of Object.entries(budgets)) {
+            push(`  ${category.padEnd(16)} >= ${pct(min)}`);
+          }
+          push('');
+
+          if (!fs.existsSync(manifestPath)) {
+            push('No .lighthouseci/manifest.json found — collect may have failed before reports were written.');
+          } else {
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            const runs = manifest.filter((run) => run.isRepresentativeRun !== false);
+
+            push('Category scores by page');
+            push('-----------------------');
+            push(
+              [
+                'Page'.padEnd(28),
+                'Perf'.padStart(6),
+                'A11y'.padStart(6),
+                'BP'.padStart(6),
+                'SEO'.padStart(6),
+                'Perf vs budget'.padStart(14),
+                'A11y vs budget'.padStart(14),
+              ].join('  '),
+            );
+            push('-'.repeat(88));
+
+            for (const run of runs) {
+              const s = run.summary || {};
+              const page = shortUrl(run.url).slice(0, 28).padEnd(28);
+              push(
+                [
+                  page,
+                  pct(s.performance).padStart(6),
+                  pct(s.accessibility).padStart(6),
+                  pct(s['best-practices']).padStart(6),
+                  pct(s.seo).padStart(6),
+                  statusFor('performance', s.performance).padStart(14),
+                  statusFor('accessibility', s.accessibility).padStart(14),
+                ].join('  '),
+              );
+            }
+
+            push('');
+            push('Report links');
+            push('------------');
+            for (const run of runs) {
+              const report =
+                run.remoteReportUrl ||
+                run.htmlPath ||
+                (run.jsonPath ? path.basename(run.jsonPath) : 'n/a');
+              push(`  ${shortUrl(run.url)}`);
+              push(`    ${report}`);
+            }
+          }
+
+          push('');
+          if (fs.existsSync(assertionPath)) {
+            const assertions = JSON.parse(fs.readFileSync(assertionPath, 'utf8'));
+            const failed = (Array.isArray(assertions) ? assertions : []).filter(
+              (a) => a.level === 'error' || a.passed === false,
+            );
+            push('Assertion results');
+            push('-----------------');
+            if (!failed.length) {
+              push('  All asserted budgets passed.');
+            } else {
+              for (const a of failed) {
+                const actual =
+                  a.actual == null && a.values
+                    ? a.values.map((v) => pct(v)).join(', ')
+                    : a.actual;
+                push(
+                  `  FAIL  ${a.url ? shortUrl(a.url) + ' · ' : ''}${a.name || a.auditId || 'assertion'}` +
+                    `  actual=${actual}  expected ${a.operator || '>='} ${a.expected ?? pct(budgets[String(a.name || '').replace('categories:', '')])}`,
+                );
+              }
+            }
+          } else {
+            push('Assertion results');
+            push('-----------------');
+            push('  No assertion-results.json (assert step may not have run).');
+          }
+
+          push('');
+          push('========================================');
+
+          const text = lines.join('\n');
+          console.log(text);
+
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            const md = [];
+            md.push('## Lighthouse results');
+            md.push('');
+            md.push('### Budgets');
+            md.push('| Category | Minimum |');
+            md.push('| --- | --- |');
+            for (const [category, min] of Object.entries(budgets)) {
+              md.push(`| ${category} | ${pct(min)} |`);
+            }
+            md.push('');
+            if (fs.existsSync(manifestPath)) {
+              const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+              const runs = manifest.filter((run) => run.isRepresentativeRun !== false);
+              md.push('### Scores by page');
+              md.push('| Page | Performance | Accessibility | Best practices | SEO | Perf budget | A11y budget |');
+              md.push('| --- | --- | --- | --- | --- | --- | --- |');
+              for (const run of runs) {
+                const s = run.summary || {};
+                md.push(
+                  `| \`${shortUrl(run.url)}\` | ${pct(s.performance)} | ${pct(s.accessibility)} | ${pct(s['best-practices'])} | ${pct(s.seo)} | ${statusFor('performance', s.performance)} | ${statusFor('accessibility', s.accessibility)} |`,
+                );
+              }
+              md.push('');
+              md.push('### Reports');
+              for (const run of runs) {
+                const report = run.remoteReportUrl || run.htmlPath || 'n/a';
+                md.push(`- \`${shortUrl(run.url)}\`: ${report}`);
+              }
+            }
+            if (fs.existsSync(assertionPath)) {
+              const assertions = JSON.parse(fs.readFileSync(assertionPath, 'utf8'));
+              const failed = (Array.isArray(assertions) ? assertions : []).filter(
+                (a) => a.level === 'error' || a.passed === false,
+              );
+              md.push('');
+              md.push('### Assertions');
+              if (!failed.length) {
+                md.push('All asserted budgets passed.');
+              } else {
+                for (const a of failed) {
+                  md.push(
+                    `- **FAIL** \`${a.name || a.auditId}\` on \`${a.url ? shortUrl(a.url) : 'n/a'}\` — actual \`${a.actual ?? a.values}\`, expected \`${a.operator || '>='} ${a.expected}\``,
+                  );
+                }
+              }
+            }
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${md.join('\n')}\n`);
+          }
+          NODE
+
+          exit "${lhci_exit}"
 
       - name: Delete preview theme
         if: always() && steps.theme.outputs.theme_id != ''

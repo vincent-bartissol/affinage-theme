@@ -6,12 +6,11 @@
 	{{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
 {%- endif -%}
 
-{%- unless section.settings.quick_add == 'none' -%}
+{%- if section.settings.quick_add == 'bulk' -%}
 	{{ 'quick-add.css' | asset_url | stylesheet_tag }}
-{%- endunless -%}
+{%- endif -%}
 
 {%- if section.settings.quick_add == 'standard' -%}
-	<script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
 	<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 

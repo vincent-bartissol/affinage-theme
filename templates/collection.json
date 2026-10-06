@@ -15,6 +15,7 @@
 				"columns_desktop": 3,
 				"image_ratio": "portrait",
 				"show_secondary_image": true,
+				"quick_add": "standard",
 				"show_vendor": false,
 				"show_rating": false,
 				"enable_filtering": true,

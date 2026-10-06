@@ -1,3 +1,9 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{%- if section.settings.show_quick_add -%}
+	<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
 <div class="slider-products-section page-width color-{{ section.settings.color_scheme }}">
 	{% if section.settings.title != blank %}
 		<h2 class="slider-products__heading {{ section.settings.heading_size }}">
@@ -25,6 +31,10 @@
 		<div class="slider-products__container swiper-wrapper">
 			{% assign collection = collections[section.settings.collection] %}
 			{% assign max_products = section.settings.max_collection | default: 8 %}
+			{% assign quick_add = 'none' %}
+			{% if section.settings.show_quick_add %}
+				{% assign quick_add = 'standard' %}
+			{% endif %}
 
 			{% if collection != blank %}
 				{% for product in collection.products limit: max_products %}
@@ -32,7 +42,9 @@
 						{% render 'card-product',
 							card_product: product,
 							media_aspect_ratio: 'portrait',
-							show_secondary_image: true
+							show_secondary_image: true,
+							quick_add: quick_add,
+							section_id: section.id
 						%}
 					</div>
 				{% endfor %}
@@ -44,7 +56,9 @@
 						{% render 'card-product',
 							card_product: block.settings.product,
 							media_aspect_ratio: 'portrait',
-							show_secondary_image: true
+							show_secondary_image: true,
+							quick_add: quick_add,
+							section_id: section.id
 						%}
 					</div>
 				{% endif %}
@@ -114,6 +128,12 @@
 				"id": "max_collection",
 				"label": "Maximum products from collection",
 				"default": 8
+			},
+			{
+				"type": "checkbox",
+				"id": "show_quick_add",
+				"label": "Quick add",
+				"default": false
 			},
 			{
 				"type": "header",
