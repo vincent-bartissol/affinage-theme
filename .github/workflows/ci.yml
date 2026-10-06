@@ -89,7 +89,7 @@ jobs:
                   `${host}/collections/all${query}`,
                   `${host}/cart${query}`,
                 ],
-                puppeteerScript: '.github/lighthouse/set-preview-cookies.js',
+                puppeteerScript: '.github/lighthouse/set-preview-cookies.cjs',
                 puppeteerLaunchOptions: {
                   executablePath: process.env.CHROME_PATH,
                   args: [
