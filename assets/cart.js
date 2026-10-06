@@ -4,9 +4,29 @@ class CartRemoveButton extends HTMLElement {
 
     this.addEventListener('click', (event) => {
       event.preventDefault();
-      const cartItems = this.closest('cart-items') || this.closest('cart-drawer-items');
-      cartItems.updateQuantity(this.dataset.index, 0, event);
+      this.onRemove(event);
     });
+  }
+
+  async onRemove(event) {
+    const cartItems = this.closest('cart-items') || this.closest('cart-drawer-items');
+
+    if (this.hasAttribute('data-free-gift')) {
+      try {
+        await fetch(`${routes.cart_update_url}`, {
+          ...fetchConfig(),
+          ...{
+            body: JSON.stringify({
+              attributes: { free_gift_declined: 'true' },
+            }),
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    cartItems.updateQuantity(this.dataset.index, 0, event);
   }
 }
 

@@ -1,0 +1,36 @@
+{% comment %}
+	Add-again control when the customer declined the free gift but still qualifies.
+{% endcomment %}
+{%- liquid
+	assign gift_product = settings.cart_free_gift_product
+	assign gift_threshold = settings.cart_free_gift_threshold | default: 0 | times: 100
+	assign gift_enabled = false
+	if settings.cart_free_gift_enabled and gift_product != blank and gift_threshold > 0
+		assign gift_enabled = true
+	endif
+
+	assign gift_in_cart = false
+	assign eligible_total = 0
+	if gift_enabled
+		for item in cart.items
+			if item.product.id == gift_product.id
+				assign gift_in_cart = true
+			else
+				assign eligible_total = eligible_total | plus: item.final_line_price
+			endif
+		endfor
+	endif
+
+	assign gift_declined = false
+	if cart.attributes.free_gift_declined == 'true'
+		assign gift_declined = true
+	endif
+-%}
+
+{%- if gift_enabled and gift_declined and gift_in_cart == false and eligible_total >= gift_threshold -%}
+	<div class="cart-free-gift">
+		<button type="button" class="button button--secondary button--full-width" data-free-gift-add>
+			{{ 'sections.cart.free_gift_add_again' | t }}
+		</button>
+	</div>
+{%- endif -%}
