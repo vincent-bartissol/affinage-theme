@@ -1,17 +1,19 @@
 # Requires
-- Node v22
+- Node v24 (see `.nvmrc`)
+- pnpm 10 (pinned via `packageManager` in `package.json`)
 - Shopify CLI https://shopify.dev/docs/api/shopify-cli/theme
 - Vite - vite-plugin-shopify https://www.npmjs.com/package/vite-plugin-shopify
 
 # Launch commands
 ```sh
-npm run dev # Launch Vite + Shopify server 
+pnpm install
+pnpm dev # Launch Vite + Shopify server
 ```
 
 ## Dev Dependency
 - Prettier : installed but not add to main command
   -- dev : "dev": "run-p \"shopify:dev\" \"vite\" \"prettier:watch\"",
-  -- npm run prettier ./layout/*  
+  -- pnpm prettier ./layout/*
 
 - Tailwind : to check installation
 
@@ -25,7 +27,7 @@ We've added Theme Check to Dawn's [list of VS Code extensions](/.vscode/extensio
 You can also run it from a terminal with the following Shopify CLI command:
 
 ```bash
-shopify theme check
+pnpm exec shopify theme check
 ```
 
 ### Continuous Integration

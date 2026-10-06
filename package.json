@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Store development for Shopify using Tailwind CSS, Vite, and Liquid.",
   "type": "module",
+  "packageManager": "pnpm@10.34.6",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "run-p \"shopify:dev\" \"vite\" \"prettier:watch\"",
@@ -27,18 +31,26 @@
   },
   "homepage": "https://github.com/vvvbb/shopify-store-dev#readme",
   "dependencies": {
-    "swiper": "^11.2.6",
-    "vite-plugin-shopify": "^4.0.0"
+    "swiper": "^11.2.10"
   },
   "devDependencies": {
-    "@shopify/prettier-plugin-liquid": "^1.9.3",
-    "@tailwindcss/postcss": "^4.1.4",
-    "@tailwindcss/vite": "^4.1.4",
-    "npm-run-all": "^4.1.5",
+    "@shopify/cli": "^4.8.4",
+    "@shopify/prettier-plugin-liquid": "^1.11.2",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "npm-run-all2": "^9.0.3",
     "onchange": "^7.1.0",
-    "postcss": "^8.5.3",
-    "prettier": "^3.5.3",
-    "tailwindcss": "^4.1.4",
-    "vite": "^6.3.3"
+    "postcss": "^8.5.29",
+    "prettier": "^3.9.9",
+    "sass-embedded": "^1.105.1",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.3",
+    "vite-plugin-shopify": "^5.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "protobufjs"
+    ]
   }
 }
