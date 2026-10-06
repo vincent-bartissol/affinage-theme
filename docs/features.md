@@ -70,7 +70,7 @@ When the cart reaches the gift threshold, a configured product is auto-added (qt
 | Sync | [`frontend/components/CartFreeGift.js`](../frontend/components/CartFreeGift.js) |
 | Add-again UI | [`snippets/cart-free-gift.liquid`](../snippets/cart-free-gift.liquid) |
 
-Gift product pages use the `free-gift` tag and redirect home. Pair the product with an automatic discount if the catalog price is not already €0.
+Gift product pages use the `free-gift` tag and redirect home. Keep a real catalog price (EUR 5-10); the automatic discount (100% off that product, spend threshold) brings the line to EUR 0. The theme hides EUR 0 discount badges on other lines when Shopify attaches phantom allocations.
 
 ## Free shipping progress and pairing
 
