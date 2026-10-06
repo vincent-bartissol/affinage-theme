@@ -1,68 +1,93 @@
-{% if section.settings.title != blank %}
-	<h2 class="text-center">{{ section.settings.title }}</h2>
-{% endif %}
-
-{% if section.settings.description != blank %}
-	<p class="text-center">{{ section.settings.description }}</p>
-{% endif %}
-
-<slider-products
-	class="slider-products swiper mt-10"
-	data-params='
-		{
-		  "slidesPerView": {{ section.settings.slides_per_view | default: 2.3 }},
-		  "spaceBetween": {{ section.settings.space_between | default: 10 }},
-		  "loop": {{ section.settings.loop | default: true }},
-		  "autoplay": {{ section.settings.autoplay | default: false }}
-		}
-	'
-	data-pagination="{{ section.settings.pagination | default: false }}"
-	data-navigation="{{ section.settings.navigation | default: false }}"
-	data-scrollbar="{{ section.settings.scrollbar | default: false }}"
->
-	<div class="slider-products__container swiper-wrapper">
-		{% assign collection = collections[section.settings.collection] %}
-		{% assign max_products = section.settings.max_collection %}
-		{% assign products = collection.products %}
-
-		{% for product in products limit: max_products %}
-			<div class="slider-products__item swiper-slide">
-				{% render 'card-product', card_product: product %}
-			</div>
-		{% endfor %}
-
-		{% for block in section.blocks %}
-			<div class="slider-products__item swiper-slide">
-				{% render 'card-product', card_product: block.settings.product %}
-			</div>
-		{% endfor %}
-	</div>
-
-	{% if section.settings.pagination %}
-		<div class="swiper-pagination"></div>
+<div class="slider-products-section page-width color-{{ section.settings.color_scheme }}">
+	{% if section.settings.title != blank %}
+		<h2 class="slider-products__heading {{ section.settings.heading_size }}">
+			{{ section.settings.title }}
+		</h2>
 	{% endif %}
 
-	{% if section.settings.navigation %}
-		<div class="swiper-button-prev"></div>
-		<div class="swiper-button-next"></div>
+	{% if section.settings.description != blank %}
+		<p class="slider-products__description">{{ section.settings.description }}</p>
 	{% endif %}
 
-	{% if section.settings.scrollbar %}
-		<div class="swiper-scrollbar"></div>
-	{% endif %}
-</slider-products>
+	<slider-products
+		class="slider-products swiper"
+		data-params='
+			{
+			  "spaceBetween": {{ section.settings.space_between | default: 16 }},
+			  "loop": {{ section.settings.loop | default: true }},
+			  "autoplay": {{ section.settings.autoplay | default: false }}
+			}
+		'
+		data-pagination="{{ section.settings.pagination | default: false }}"
+		data-navigation="{{ section.settings.navigation | default: false }}"
+		data-scrollbar="{{ section.settings.scrollbar | default: false }}"
+	>
+		<div class="slider-products__container swiper-wrapper">
+			{% assign collection = collections[section.settings.collection] %}
+			{% assign max_products = section.settings.max_collection | default: 8 %}
+
+			{% if collection != blank %}
+				{% for product in collection.products limit: max_products %}
+					<div class="slider-products__item swiper-slide">
+						{% render 'card-product',
+							card_product: product,
+							media_aspect_ratio: 'portrait',
+							show_secondary_image: true
+						%}
+					</div>
+				{% endfor %}
+			{% endif %}
+
+			{% for block in section.blocks %}
+				{% if block.settings.product != blank %}
+					<div class="slider-products__item swiper-slide" {{ block.shopify_attributes }}>
+						{% render 'card-product',
+							card_product: block.settings.product,
+							media_aspect_ratio: 'portrait',
+							show_secondary_image: true
+						%}
+					</div>
+				{% endif %}
+			{% endfor %}
+		</div>
+
+		{% if section.settings.pagination %}
+			<div class="swiper-pagination"></div>
+		{% endif %}
+
+		{% if section.settings.navigation %}
+			<div class="swiper-button-prev"></div>
+			<div class="swiper-button-next"></div>
+		{% endif %}
+
+		{% if section.settings.scrollbar %}
+			<div class="swiper-scrollbar"></div>
+		{% endif %}
+	</slider-products>
+</div>
 
 {% schema %}
 	{
 		"name": "Slider Products",
 		"tag": "section",
-		"class": "slider-products",
+		"class": "section slider-products-section",
 		"settings": [
 			{
 				"type": "text",
 				"id": "title",
 				"label": "Title",
-				"default": "Slider Products"
+				"default": "From the cave"
+			},
+			{
+				"type": "select",
+				"id": "heading_size",
+				"options": [
+					{ "value": "h2", "label": "Small" },
+					{ "value": "h1", "label": "Medium" },
+					{ "value": "h0", "label": "Large" }
+				],
+				"default": "h2",
+				"label": "Heading size"
 			},
 			{
 				"type": "text",
@@ -70,8 +95,14 @@
 				"label": "Description"
 			},
 			{
+				"type": "color_scheme",
+				"id": "color_scheme",
+				"label": "Color scheme",
+				"default": "scheme-1"
+			},
+			{
 				"type": "header",
-				"content": "Collection Selection"
+				"content": "Collection"
 			},
 			{
 				"type": "collection",
@@ -81,34 +112,45 @@
 			{
 				"type": "number",
 				"id": "max_collection",
-				"label": "Maximum number of products to show"
+				"label": "Maximum products from collection",
+				"default": 8
 			},
 			{
 				"type": "header",
-				"content": "Slider Parameters"
+				"content": "Slider"
 			},
 			{
 				"type": "checkbox",
 				"id": "pagination",
-				"label": "Pagination"
+				"label": "Pagination",
+				"default": false
 			},
 			{
 				"type": "checkbox",
 				"id": "navigation",
-				"label": "Navigation"
+				"label": "Navigation",
+				"default": true
 			},
 			{
 				"type": "checkbox",
 				"id": "scrollbar",
-				"label": "Scrollbar"
+				"label": "Scrollbar",
+				"default": false
 			},
 			{
 				"type": "checkbox",
 				"id": "loop",
-				"label": "Loop"
+				"label": "Loop",
+				"default": true
+			},
+			{
+				"type": "checkbox",
+				"id": "autoplay",
+				"label": "Autoplay",
+				"default": false
 			}
 		],
-		"max_blocks": 5,
+		"max_blocks": 8,
 		"blocks": [
 			{
 				"type": "product",
@@ -120,6 +162,11 @@
 						"label": "Product"
 					}
 				]
+			}
+		],
+		"presets": [
+			{
+				"name": "Slider Products"
 			}
 		]
 	}

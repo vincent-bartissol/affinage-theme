@@ -4,3 +4,122 @@
 
 // components
 @use "@/components/Slider.scss";
+
+/* Maison Affinage — product cards & storefront polish */
+:root {
+	--maison-ink: #1c1915;
+	--maison-paper: #f7f3ec;
+	--maison-amber: #c4833a;
+}
+
+.card-wrapper .card__heading {
+	font-size: 1.05rem;
+	letter-spacing: 0.01em;
+}
+
+.card-wrapper .price {
+	margin-top: 0.35rem;
+	letter-spacing: 0.02em;
+}
+
+.card-wrapper .card__media {
+	overflow: hidden;
+}
+
+.card-wrapper .media img {
+	transition: transform 0.45s ease;
+}
+
+.card-wrapper:hover .media img {
+	transform: scale(1.03);
+}
+
+.card--standard .card__inner {
+	background: transparent;
+}
+
+.product-grid .card__information {
+	padding-top: 0.85rem;
+}
+
+.collection-hero__title {
+	letter-spacing: -0.02em;
+}
+
+.cart-shipping-progress {
+	margin-bottom: 1rem;
+	padding: 0.85rem 0 0.25rem;
+}
+
+.cart-shipping-progress__label {
+	display: block;
+	margin-bottom: 0.5rem;
+	font-size: 0.9rem;
+}
+
+.cart-shipping-progress__track {
+	display: block;
+	height: 3px;
+	background: rgba(var(--color-foreground), 0.12);
+	overflow: hidden;
+}
+
+.cart-shipping-progress__bar {
+	display: block;
+	height: 100%;
+	background: var(--maison-amber);
+	transition: width 0.35s ease;
+}
+
+.cart-pairing {
+	margin-top: 1.25rem;
+	padding-top: 1rem;
+	border-top: 1px solid rgba(var(--color-foreground), 0.08);
+}
+
+.cart-pairing__title {
+	margin: 0 0 0.75rem;
+	font-size: 0.95rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.cart-pairing__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.75rem;
+}
+
+.cart-pairing__item {
+	display: grid;
+	grid-template-columns: 3.5rem 1fr;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+.cart-pairing__image {
+	display: block;
+	width: 3.5rem;
+	height: 3.5rem;
+	object-fit: cover;
+}
+
+.cart-pairing__meta {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	min-width: 0;
+}
+
+.cart-pairing__name {
+	font-size: 0.95rem;
+	text-decoration: none;
+	color: rgb(var(--color-foreground));
+}
+
+.cart-pairing__price {
+	font-size: 0.85rem;
+	opacity: 0.75;
+}

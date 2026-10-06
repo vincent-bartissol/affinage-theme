@@ -1,34 +1,87 @@
-.swiper {
-	// width: 600px;
-	height: 300px;
+.slider-products {
+	position: relative;
+	padding-inline: 1.5rem;
+	margin-block: 1rem 2.5rem;
 
-	.swiper-pagination {
-		display: block;
+	@media screen and (min-width: 750px) {
+		padding-inline: 2rem;
+	}
+
+	&__heading {
+		text-align: center;
+		margin-bottom: 0.5rem;
+	}
+
+	&__description {
+		text-align: center;
+		max-width: 36rem;
+		margin: 0 auto 1.5rem;
+		opacity: 0.85;
+	}
+
+	.swiper-wrapper {
+		align-items: stretch;
+	}
+
+	.swiper-slide {
+		height: auto;
 	}
 
 	.swiper-button-prev,
 	.swiper-button-next {
-		display: block;
-		width: 40px;
-		height: 40px;
-		&:hover {
-			&::after {
-				transform: translate(-50%, -50%) scale(1.1);
-				transition: transform 0.3s ease;
-			}
-		}
+		width: 2.75rem;
+		height: 2.75rem;
+		color: rgb(var(--color-foreground));
+		background: rgb(var(--color-background));
+		border: 1px solid rgba(var(--color-foreground), 0.2);
+		border-radius: 0;
+		margin-top: 0;
+		top: 40%;
+		transform: translateY(-50%);
+
 		&::after {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
+			font-size: 0.85rem;
+			font-weight: 700;
+		}
+
+		&:hover {
+			border-color: rgba(var(--color-foreground), 0.55);
+		}
+
+		&.swiper-button-disabled {
+			opacity: 0.35;
+		}
+	}
+
+	.swiper-button-prev {
+		left: 0.25rem;
+	}
+
+	.swiper-button-next {
+		right: 0.25rem;
+	}
+
+	.swiper-pagination {
+		bottom: 0;
+		position: relative;
+		margin-top: 1.25rem;
+
+		.swiper-pagination-bullet {
+			background: rgb(var(--color-foreground));
+			opacity: 0.25;
+		}
+
+		.swiper-pagination-bullet-active {
+			opacity: 1;
 		}
 	}
 
 	.swiper-scrollbar {
-		display: block;
-		* {
-			display: block;
+		margin-top: 1rem;
+		background: rgba(var(--color-foreground), 0.08);
+
+		.swiper-scrollbar-drag {
+			background: rgba(var(--color-foreground), 0.45);
 		}
 	}
 }

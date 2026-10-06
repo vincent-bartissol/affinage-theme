@@ -6,23 +6,23 @@
 				"heading": {
 					"type": "heading",
 					"settings": {
-						"heading": "Image banner",
+						"heading": "Maison Affinage",
 						"heading_size": "h0"
 					}
 				},
 				"text": {
 					"type": "text",
 					"settings": {
-						"text": "Give customers details about the banner image(s) or content on the template.",
+						"text": "Cheeses aged in our cave, cut to order, and shipped cold.",
 						"text_style": "body"
 					}
 				},
 				"button": {
 					"type": "buttons",
 					"settings": {
-						"button_label_1": "Shop all",
+						"button_label_1": "Shop the cave",
 						"button_link_1": "shopify://collections/all",
-						"button_style_secondary_1": true,
+						"button_style_secondary_1": false,
 						"button_label_2": "",
 						"button_link_2": "",
 						"button_style_secondary_2": false
@@ -31,9 +31,9 @@
 			},
 			"block_order": ["heading", "text", "button"],
 			"settings": {
-				"image_overlay_opacity": 40,
+				"image_overlay_opacity": 48,
 				"image_height": "large",
-				"desktop_content_position": "bottom-center",
+				"desktop_content_position": "middle-center",
 				"show_text_box": false,
 				"desktop_content_alignment": "center",
 				"color_scheme": "scheme-3",
@@ -42,151 +42,14 @@
 				"show_text_below": false
 			}
 		},
-		"slider_products": {
-			"type": "slider-products",
-			"blocks": {
-				"product_PHXemN": {
-					"type": "product",
-					"settings": {
-						"product": "black-leather-bag"
-					}
-				},
-				"product_9iKzDG": {
-					"type": "product",
-					"settings": {
-						"product": "blue-silk-tuxedo"
-					}
-				},
-				"product_xyNgWc": {
-					"type": "product",
-					"settings": {
-						"product": "chequered-red-shirt"
-					}
-				},
-				"product_6jmX6A": {
-					"type": "product",
-					"settings": {
-						"product": "yellow-wool-jumper"
-					}
-				}
-			},
-			"block_order": [
-				"product_PHXemN",
-				"product_9iKzDG",
-				"product_xyNgWc",
-				"product_6jmX6A"
-			],
-			"settings": {
-				"title": "Slider Products",
-				"description": "Description lorem",
-				"collection": "frontpage",
-				"max_collection": 2,
-				"pagination": false,
-				"navigation": true,
-				"scrollbar": false,
-				"loop": true
-			}
-		},
-		"rich_text": {
-			"type": "rich-text",
-			"blocks": {
-				"heading": {
-					"type": "heading",
-					"settings": {
-						"heading": "Talk about your brand",
-						"heading_size": "h1"
-					}
-				},
-				"text": {
-					"type": "text",
-					"settings": {
-						"text": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.<\/p>"
-					}
-				}
-			},
-			"block_order": ["heading", "text"],
-			"settings": {
-				"color_scheme": "scheme-1",
-				"full_width": true,
-				"padding_top": 40,
-				"padding_bottom": 0
-			}
-		},
-		"featured_collection": {
-			"type": "featured-collection",
-			"settings": {
-				"title": "Featured products",
-				"heading_size": "h2",
-				"collection": "all",
-				"products_to_show": 8,
-				"columns_desktop": 4,
-				"color_scheme": "scheme-1",
-				"show_view_all": false,
-				"swipe_on_mobile": false,
-				"image_ratio": "adapt",
-				"show_secondary_image": true,
-				"show_vendor": false,
-				"show_rating": false,
-				"columns_mobile": "2",
-				"padding_top": 28,
-				"padding_bottom": 36
-			}
-		},
-		"collage": {
-			"type": "collage",
-			"blocks": {
-				"collection-0": {
-					"type": "collection",
-					"settings": {
-						"collection": ""
-					}
-				},
-				"product": {
-					"type": "product",
-					"settings": {
-						"product": "",
-						"second_image": false
-					}
-				},
-				"collection-1": {
-					"type": "collection",
-					"settings": {
-						"collection": ""
-					}
-				}
-			},
-			"block_order": ["collection-0", "product", "collection-1"],
-			"settings": {
-				"heading": "Multimedia collage",
-				"heading_size": "h2",
-				"desktop_layout": "left",
-				"mobile_layout": "collage",
-				"color_scheme": "scheme-1",
-				"padding_top": 36,
-				"padding_bottom": 36
-			}
-		},
-		"video": {
-			"type": "video",
-			"settings": {
-				"heading": "",
-				"video_url": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
-				"heading_size": "h1",
-				"description": "",
-				"full_width": false,
-				"color_scheme": "scheme-1",
-				"padding_top": 36,
-				"padding_bottom": 36
-			}
-		},
-		"multicolumn": {
+		"promises": {
 			"type": "multicolumn",
 			"blocks": {
 				"column1": {
 					"type": "column",
 					"settings": {
-						"title": "Column",
-						"text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
+						"title": "Cave-aged",
+						"text": "<p>Slow affinage under controlled humidity until each wheel is ready to cut.</p>",
 						"link_label": "",
 						"link": ""
 					}
@@ -194,8 +57,8 @@
 				"column2": {
 					"type": "column",
 					"settings": {
-						"title": "Column",
-						"text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
+						"title": "Cold shipping",
+						"text": "<p>Insulated packs leave our atelier the same day so soft rinds arrive intact.</p>",
 						"link_label": "",
 						"link": ""
 					}
@@ -203,8 +66,8 @@
 				"column3": {
 					"type": "column",
 					"settings": {
-						"title": "Column",
-						"text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
+						"title": "Pairing notes",
+						"text": "<p>Every cheese ships with a short note on milk, texture, and what to pour beside it.</p>",
 						"link_label": "",
 						"link": ""
 					}
@@ -212,66 +75,158 @@
 			},
 			"block_order": ["column1", "column2", "column3"],
 			"settings": {
-				"title": "",
-				"heading_size": "h1",
-				"image_width": "third",
+				"title": "From our atelier",
+				"heading_size": "h2",
+				"image_width": "full",
 				"image_ratio": "adapt",
 				"columns_desktop": 3,
-				"column_alignment": "center",
+				"column_alignment": "left",
 				"background_style": "none",
 				"button_label": "",
 				"button_link": "",
 				"swipe_on_mobile": false,
 				"color_scheme": "scheme-1",
 				"columns_mobile": "1",
+				"padding_top": 48,
+				"padding_bottom": 24
+			}
+		},
+		"collection_list": {
+			"type": "collection-list",
+			"blocks": {
+				"soft": {
+					"type": "featured_collection",
+					"settings": {
+						"collection": "fromages-pate-molle"
+					}
+				},
+				"pressed": {
+					"type": "featured_collection",
+					"settings": {
+						"collection": "fromages-pate-pressee-cuite"
+					}
+				},
+				"blue": {
+					"type": "featured_collection",
+					"settings": {
+						"collection": "fromages-bleus"
+					}
+				},
+				"goat": {
+					"type": "featured_collection",
+					"settings": {
+						"collection": "fromages-chevre"
+					}
+				}
+			},
+			"block_order": ["soft", "pressed", "blue", "goat"],
+			"settings": {
+				"title": "Cheese families",
+				"heading_size": "h2",
+				"image_ratio": "portrait",
+				"columns_desktop": 4,
+				"color_scheme": "scheme-1",
+				"show_view_all": false,
+				"columns_mobile": "2",
+				"swipe_on_mobile": false,
 				"padding_top": 36,
 				"padding_bottom": 36
 			}
 		},
-		"form_customer_info_app": {
-			"disabled": true,
-			"type": "apps",
+		"slider_products": {
+			"type": "slider-products",
+			"settings": {
+				"title": "From the cave this week",
+				"description": "A rotating cut of soft, pressed, blue, and goat cheeses.",
+				"collection": "featured",
+				"max_collection": 8,
+				"pagination": false,
+				"navigation": true,
+				"scrollbar": false,
+				"loop": true
+			}
+		},
+		"brand_story": {
+			"type": "image-with-text",
 			"blocks": {
-				"forms_inline_hipbA4": {
-					"type": "shopify://apps/forms/blocks/inline/8744a304-fcb1-4347-b211-bb6b4759a76a",
+				"heading": {
+					"type": "heading",
 					"settings": {
-						"form_id": "456358",
-						"text_color": "#202020",
-						"button_background_color": "#202020",
-						"button_label_color": "#FFFFFF",
-						"links_color": "#1878B9",
-						"errors_color": "#E02229",
-						"text_alignment": "center",
-						"form_alignment": "center",
-						"padding_top": 0,
-						"padding_bottom": 0,
-						"padding_right": 0,
-						"padding_left": 0
+						"heading": "Affinage, not shortcuts",
+						"heading_size": "h1"
+					}
+				},
+				"text": {
+					"type": "text",
+					"settings": {
+						"text": "<p>Maison Affinage selects wheels from small producers, then finishes them in our cave until the rind, paste, and perfume are in balance. We cut to order — never vacuum-packed weeks ahead.</p>",
+						"text_style": "body"
+					}
+				},
+				"button": {
+					"type": "button",
+					"settings": {
+						"button_label": "Discover our approach",
+						"button_link": "shopify://collections/fromages-francais"
 					}
 				}
 			},
-			"block_order": ["forms_inline_hipbA4"],
+			"block_order": ["heading", "text", "button"],
 			"settings": {
-				"include_margins": true
+				"height": "adapt",
+				"desktop_image_width": "medium",
+				"layout": "image_first",
+				"desktop_content_position": "middle",
+				"desktop_content_alignment": "left",
+				"content_layout": "no-overlap",
+				"color_scheme": "scheme-2",
+				"mobile_content_alignment": "left",
+				"padding_top": 48,
+				"padding_bottom": 48
 			}
 		},
-		"form_customer_info": {
-			"type": "form-customer-info"
+		"newsletter": {
+			"type": "newsletter",
+			"blocks": {
+				"heading": {
+					"type": "heading",
+					"settings": {
+						"heading": "Cave notes",
+						"heading_size": "h1"
+					}
+				},
+				"paragraph": {
+					"type": "paragraph",
+					"settings": {
+						"text": "<p>Seasonal arrivals, tasting tips, and cold-ship windows — a short letter from the atelier.</p>"
+					}
+				},
+				"email_form": {
+					"type": "email_form",
+					"settings": {}
+				}
+			},
+			"block_order": ["heading", "paragraph", "email_form"],
+			"settings": {
+				"color_scheme": "scheme-3",
+				"full_width": true,
+				"padding_top": 56,
+				"padding_bottom": 56
+			}
 		},
 		"api_graphql": {
 			"type": "api-graphql"
+		},
+		"form_customer_info": {
+			"type": "form-customer-info"
 		}
 	},
 	"order": [
 		"image_banner",
-		"api_graphql",
+		"promises",
+		"collection_list",
 		"slider_products",
-		"rich_text",
-		"featured_collection",
-		"collage",
-		"video",
-		"multicolumn",
-		"form_customer_info_app",
-		"form_customer_info"
+		"brand_story",
+		"newsletter"
 	]
 }
