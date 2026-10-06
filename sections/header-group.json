@@ -5,17 +5,25 @@
 		"announcement-bar": {
 			"type": "announcement-bar",
 			"blocks": {
-				"announcement-bar-0": {
+				"free_shipping": {
+					"type": "free_shipping",
+					"settings": {
+						"link": ""
+					}
+				},
+				"announcement-cheese": {
 					"type": "announcement",
 					"settings": {
-						"text": "Cold-packed shipping across France — free from €60",
-						"text_alignment": "center",
-						"color_scheme": "scheme-3",
+						"text": "The best cheeses, aged in our cave",
 						"link": ""
 					}
 				}
 			},
-			"block_order": ["announcement-bar-0"]
+			"block_order": ["free_shipping", "announcement-cheese"],
+			"settings": {
+				"auto_rotate": true,
+				"change_slides_speed": 5
+			}
 		},
 		"header": {
 			"type": "header",

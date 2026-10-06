@@ -442,6 +442,9 @@
     "announcement-bar": {
       "name": "Barre d'annonces",
       "blocks": {
+        "free_shipping": {
+          "name": "Livraison offerte"
+        },
         "announcement": {
           "name": "Annonce",
           "settings": {

@@ -1,0 +1,61 @@
+{% comment %}
+	Renders one announcement-bar block (static text or live free-shipping message).
+	Accepts: block
+{% endcomment %}
+{%- liquid
+	assign free_shipping_threshold = settings.cart_free_shipping_threshold | default: 60 | times: 100
+-%}
+
+{%- case block.type -%}
+	{%- when 'free_shipping' -%}
+		{%- if free_shipping_threshold > 0 -%}
+			{%- liquid
+				assign remaining = free_shipping_threshold | minus: cart.total_price
+				if remaining < 0
+					assign remaining = 0
+				endif
+				assign remaining_money = remaining | money
+			-%}
+			{%- if block.settings.link != blank -%}
+				<a
+					href="{{ block.settings.link }}"
+					class="announcement-bar__link link link--text focus-inset animate-arrow"
+				>
+			{%- endif -%}
+			<p class="announcement-bar__message h5">
+				<span data-free-shipping-message>
+					{%- if remaining == 0 -%}
+						{{ 'sections.announcements.free_shipping_unlocked' | t }}
+					{%- elsif cart == empty -%}
+						{{ 'sections.announcements.free_shipping_from_html' | t: amount: remaining_money }}
+					{%- else -%}
+						{{ 'sections.announcements.free_shipping_remaining_html' | t: amount: remaining_money }}
+					{%- endif -%}
+				</span>
+				{%- if block.settings.link != blank -%}
+					{{- 'icon-arrow.svg' | inline_asset_content -}}
+				{%- endif -%}
+			</p>
+			{%- if block.settings.link != blank -%}
+				</a>
+			{%- endif -%}
+		{%- endif -%}
+	{%- when 'announcement' -%}
+		{%- if block.settings.text != blank -%}
+			{%- if block.settings.link != blank -%}
+				<a
+					href="{{ block.settings.link }}"
+					class="announcement-bar__link link link--text focus-inset animate-arrow"
+				>
+			{%- endif -%}
+			<p class="announcement-bar__message h5">
+				<span>{{ block.settings.text | escape }}</span>
+				{%- if block.settings.link != blank -%}
+					{{- 'icon-arrow.svg' | inline_asset_content -}}
+				{%- endif -%}
+			</p>
+			{%- if block.settings.link != blank -%}
+				</a>
+			{%- endif -%}
+		{%- endif -%}
+{%- endcase -%}
