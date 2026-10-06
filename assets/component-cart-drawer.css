@@ -323,6 +323,7 @@ cart-drawer-items {
 
 .cart-drawer .cart__checkout-button {
   max-width: none;
+  width: 100%;
 }
 
 .drawer__footer .cart__dynamic-checkout-buttons {
