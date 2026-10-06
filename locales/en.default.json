@@ -485,7 +485,13 @@
       "email": "Email",
       "password": "Password",
       "occupation": "Occupation",
-      "submit": "Create"
+      "submit": "Create",
+      "gender":{
+        "gender": "Gender",
+        "man": "Man",
+        "woman": "Woman",
+        "other": "Other"
+      }
     },
     "reset_password": {
       "title": "Reset account password",

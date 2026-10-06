@@ -19,6 +19,16 @@
 		{{ 'customer.register.title' | t }}
 	</h1>
 	{%- form 'create_customer', novalidate: 'novalidate' -%}
+		<input
+			type="hidden"
+			name="customer[note][language]"
+			value="{{ request.locale.iso_code }}_{{ localization.country.iso_code }}"
+		>
+		<input
+			type="hidden"
+			name="customer[tags]"
+			value="{{ request.locale.iso_code }}_{{ localization.country.iso_code }}"
+		>
 		{%- if form.errors -%}
 			<h2 class="form__message" tabindex="-1" autofocus>
 				<span class="svg-wrapper">
@@ -129,7 +139,7 @@
 		{%- endif -%}
 		<div class="field">
 			<input
-				type="occupation"
+				type="text"
 				name="customer[note][Occupation]"
 				id="RegisterForm-occupation"
 				placeholder="{{ 'customer.register.occupation' | t }}"
@@ -138,9 +148,15 @@
 				{{ 'customer.register.occupation' | t }}
 			</label>
 		</div>
-		<button>
-			{{ 'customer.register.submit' | t }}
-		</button>
+		<div class="field">
+			<select name="customer[note][Gender]">
+				<option selected disabled value="">{{ 'customer.register.gender.gender' | t }}</option>
+				<option value="man">{{ 'customer.register.gender.man' | t }}</option>
+				<option value="woman">{{ 'customer.register.gender.woman' | t }}</option>
+				<option value="other">{{ 'customer.register.gender.other' | t }}</option>
+			</select>
+		</div>
+		<button>{{ 'customer.register.submit' | t }}</button>
 	{%- endform -%}
 </div>
 
