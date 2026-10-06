@@ -1,23 +1,24 @@
-{%- comment -%} Fixed overlay text over fading background images {%- endcomment -%}
-{%- liquid
-	assign hero_height = section.settings.image_height
-	assign overlay_opacity = section.settings.image_overlay_opacity | divided_by: 100.0
--%}
+{{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+	#Banner-{{ section.id }}::after {
+	  opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+	}
+{%- endstyle -%}
 
 <div
-	id="HeroBackground-{{ section.id }}"
-	class="hero-background-slider color-{{ section.settings.color_scheme }} gradient"
-	data-section-id="{{ section.id }}"
+	id="Banner-{{ section.id }}"
+	class="banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--content-align-mobile-{{ section.settings.mobile_content_alignment }} banner--{{ section.settings.image_height }}{% if section.settings.show_text_below %} banner--mobile-bottom{% endif %}{% if section.settings.show_text_box == false %} banner--desktop-transparent{% endif %}"
 >
-	<div class="hero-background-slider__inner hero-background-slider--{{ hero_height }}">
+	<div class="banner__media media">
 		{%- if section.blocks.size > 0 -%}
 			<hero-background-slider
-				class="hero-background-slider__swiper swiper"
+				class="hero-background-slider swiper"
 				data-params='
 					{
 						"slidesPerView": 1,
 						"spaceBetween": 0,
-						"loop": true,
+						"loop": {% if section.blocks.size > 1 %}true{% else %}false{% endif %},
 						"effect": "fade",
 						"fadeEffect": { "crossFade": true },
 						"autoplay": { "delay": {{ section.settings.autoplay_delay | default: 5000 }}, "disableOnInteraction": false },
@@ -30,7 +31,7 @@
 			>
 				<div class="swiper-wrapper">
 					{%- for block in section.blocks -%}
-						<div class="hero-background-slider__slide swiper-slide" {{ block.shopify_attributes }}>
+						<div class="hero-background-slider__slide swiper-slide media" {{ block.shopify_attributes }}>
 							{%- if block.settings.image != blank -%}
 								{%- liquid
 									assign img_loading = 'lazy'
@@ -47,13 +48,12 @@
 									| image_tag:
 										loading: img_loading,
 										fetchpriority: img_fetchpriority,
-										class: 'hero-background-slider__image',
 										sizes: '100vw',
-										widths: '750, 1100, 1500, 1780, 2000, 3000, 3840',
+										widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
 										alt: img_alt
 								}}
 							{%- else -%}
-								{{ 'lifestyle-1' | placeholder_svg_tag: 'hero-background-slider__placeholder' }}
+								{{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
 							{%- endif -%}
 						</div>
 					{%- endfor -%}
@@ -63,41 +63,37 @@
 				{%- endif -%}
 			</hero-background-slider>
 		{%- else -%}
-			<div class="hero-background-slider__fallback">
-				{{ 'lifestyle-1' | placeholder_svg_tag: 'hero-background-slider__placeholder' }}
-			</div>
+			{{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
 		{%- endif -%}
+	</div>
 
-		<div
-			class="hero-background-slider__overlay"
-			style="--hero-overlay-opacity: {{ overlay_opacity }};"
-			aria-hidden="true"
-		></div>
-
-		<div class="hero-background-slider__content page-width">
-			<div class="hero-background-slider__text hero-background-slider__text--{{ section.settings.content_alignment }}">
-				{%- if section.settings.heading != blank -%}
-					<h1 class="hero-background-slider__heading {{ section.settings.heading_size }}">
-						{{ section.settings.heading }}
-					</h1>
-				{%- endif -%}
-				{%- if section.settings.text != blank -%}
-					<p class="hero-background-slider__subheading">{{ section.settings.text }}</p>
-				{%- endif -%}
-				{%- if section.settings.button_label != blank -%}
+	<div class="banner__content banner__content--{{ section.settings.desktop_content_position }} page-width">
+		<div class="banner__box content-container content-container--full-width-mobile color-{{ section.settings.color_scheme }} gradient">
+			{%- if section.settings.heading != blank -%}
+				<h2 class="banner__heading inline-richtext {{ section.settings.heading_size }}">
+					{{ section.settings.heading }}
+				</h2>
+			{%- endif -%}
+			{%- if section.settings.text != blank -%}
+				<div class="banner__text rte body">
+					<p>{{ section.settings.text }}</p>
+				</div>
+			{%- endif -%}
+			{%- if section.settings.button_label != blank -%}
+				<div class="banner__buttons">
 					<a
-						{% if section.settings.button_link != blank %}
-							href="{{ section.settings.button_link }}"
-						{% else %}
+						{% if section.settings.button_link == blank %}
 							role="link"
 							aria-disabled="true"
+						{% else %}
+							href="{{ section.settings.button_link }}"
 						{% endif %}
 						class="button{% if section.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}"
 					>
 						{{- section.settings.button_label | escape -}}
 					</a>
-				{%- endif -%}
-			</div>
+				</div>
+			{%- endif -%}
 		</div>
 	</div>
 </div>
@@ -106,7 +102,10 @@
 	{
 		"name": "Hero background slider",
 		"tag": "section",
-		"class": "section section-hero-background-slider",
+		"class": "section",
+		"disabled_on": {
+			"groups": ["header", "footer"]
+		},
 		"max_blocks": 6,
 		"settings": [
 			{
@@ -150,15 +149,14 @@
 				"default": false
 			},
 			{
-				"type": "select",
-				"id": "content_alignment",
-				"options": [
-					{ "value": "left", "label": "Left" },
-					{ "value": "center", "label": "Center" },
-					{ "value": "right", "label": "Right" }
-				],
-				"default": "center",
-				"label": "Content alignment"
+				"type": "range",
+				"id": "image_overlay_opacity",
+				"min": 0,
+				"max": 100,
+				"step": 10,
+				"unit": "%",
+				"label": "Image overlay opacity",
+				"default": 50
 			},
 			{
 				"type": "select",
@@ -169,17 +167,64 @@
 					{ "value": "large", "label": "Large" }
 				],
 				"default": "large",
-				"label": "Hero height"
+				"label": "Banner height"
 			},
 			{
-				"type": "range",
-				"id": "image_overlay_opacity",
-				"min": 0,
-				"max": 100,
-				"step": 10,
-				"unit": "%",
-				"label": "Image overlay opacity",
-				"default": 50
+				"type": "select",
+				"id": "desktop_content_position",
+				"options": [
+					{ "value": "top-left", "label": "Top left" },
+					{ "value": "top-center", "label": "Top center" },
+					{ "value": "top-right", "label": "Top right" },
+					{ "value": "middle-left", "label": "Middle left" },
+					{ "value": "middle-center", "label": "Middle center" },
+					{ "value": "middle-right", "label": "Middle right" },
+					{ "value": "bottom-left", "label": "Bottom left" },
+					{ "value": "bottom-center", "label": "Bottom center" },
+					{ "value": "bottom-right", "label": "Bottom right" }
+				],
+				"default": "middle-center",
+				"label": "Desktop content position"
+			},
+			{
+				"type": "checkbox",
+				"id": "show_text_box",
+				"default": false,
+				"label": "Show text box on desktop"
+			},
+			{
+				"type": "select",
+				"id": "desktop_content_alignment",
+				"options": [
+					{ "value": "left", "label": "Left" },
+					{ "value": "center", "label": "Center" },
+					{ "value": "right", "label": "Right" }
+				],
+				"default": "center",
+				"label": "Desktop content alignment"
+			},
+			{
+				"type": "color_scheme",
+				"id": "color_scheme",
+				"label": "Color scheme",
+				"default": "scheme-3"
+			},
+			{
+				"type": "select",
+				"id": "mobile_content_alignment",
+				"options": [
+					{ "value": "left", "label": "Left" },
+					{ "value": "center", "label": "Center" },
+					{ "value": "right", "label": "Right" }
+				],
+				"default": "center",
+				"label": "Mobile content alignment"
+			},
+			{
+				"type": "checkbox",
+				"id": "show_text_below",
+				"default": false,
+				"label": "Show text below image on mobile"
 			},
 			{
 				"type": "range",
@@ -196,12 +241,6 @@
 				"id": "show_pagination",
 				"label": "Show dots",
 				"default": true
-			},
-			{
-				"type": "color_scheme",
-				"id": "color_scheme",
-				"label": "Color scheme",
-				"default": "scheme-3"
 			}
 		],
 		"blocks": [

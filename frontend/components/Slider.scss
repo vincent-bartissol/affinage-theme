@@ -86,118 +86,39 @@
 	}
 }
 
-.hero-background-slider {
-	position: relative;
+/* Fill Dawn banner__media; text stays in banner__content */
+.banner__media .hero-background-slider {
+	display: block;
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
 	overflow: hidden;
 
-	&__inner {
-		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 28rem;
-	}
-
-	&--small {
-		min-height: 28rem;
-	}
-
-	&--medium {
-		min-height: 34rem;
-	}
-
-	&--large {
-		min-height: 42rem;
-
-		@media screen and (min-width: 750px) {
-			min-height: 54rem;
-		}
-	}
-
-	&__swiper,
-	&__fallback {
-		position: absolute;
-		inset: 0;
-		z-index: 0;
-		width: 100%;
+	.swiper-wrapper,
+	.swiper-slide {
 		height: 100%;
-	}
-
-	&__slide,
-	&__fallback {
 		width: 100%;
-		height: 100%;
 	}
 
-	&__image,
-	&__placeholder {
+	.swiper-slide img,
+	.swiper-slide .placeholder-svg {
 		display: block;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-	}
-
-	&__placeholder {
-		background: #2a241c;
-	}
-
-	&__overlay {
-		position: absolute;
-		inset: 0;
-		z-index: 1;
-		background: #1c1915;
-		opacity: var(--hero-overlay-opacity, 0.5);
-		pointer-events: none;
-	}
-
-	&__content {
-		position: relative;
-		z-index: 2;
-		width: 100%;
-		padding-block: 4rem;
-		pointer-events: none;
-	}
-
-	&__text {
-		max-width: 40rem;
-		pointer-events: auto;
-
-		&--center {
-			margin-inline: auto;
-			text-align: center;
-		}
-
-		&--left {
-			margin-inline: 0 auto;
-			text-align: left;
-		}
-
-		&--right {
-			margin-inline: auto 0;
-			text-align: right;
-		}
-	}
-
-	&__heading {
-		margin: 0 0 1rem;
-		color: rgb(var(--color-foreground));
-	}
-
-	&__subheading {
-		margin: 0 0 1.75rem;
-		font-size: 1.1rem;
-		line-height: 1.5;
-		color: rgb(var(--color-foreground));
-		opacity: 0.92;
+		object-position: center;
+		max-width: none;
 	}
 
 	&__pagination {
 		bottom: 1.25rem !important;
-		z-index: 3;
+		z-index: 2;
 
 		.swiper-pagination-bullet {
 			background: #f7f3ec;
-			opacity: 0.4;
+			opacity: 0.45;
 		}
 
 		.swiper-pagination-bullet-active {
