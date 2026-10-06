@@ -1,8 +1,7 @@
 const CART_UPDATE_EVENT = "cart-update";
 
-class AnnouncementFreeShipping extends HTMLElement {
+class AnnouncementBarLive extends HTMLElement {
 	connectedCallback() {
-		this.messageEl = this.querySelector("[data-free-shipping-message]");
 		this.sectionId = this.dataset.sectionId;
 
 		if (typeof window.subscribe === "function") {
@@ -20,7 +19,7 @@ class AnnouncementFreeShipping extends HTMLElement {
 	}
 
 	async refresh() {
-		if (!this.sectionId || !this.messageEl) return;
+		if (!this.sectionId) return;
 
 		try {
 			const url = new URL(window.location.href);
@@ -31,15 +30,15 @@ class AnnouncementFreeShipping extends HTMLElement {
 
 			const html = await response.text();
 			const doc = new DOMParser().parseFromString(html, "text/html");
-			const nextMessage = doc.querySelector("[data-free-shipping-message]");
+			const next = doc.querySelector("announcement-bar-live");
 
-			if (nextMessage) {
-				this.messageEl.textContent = nextMessage.textContent;
+			if (next) {
+				this.innerHTML = next.innerHTML;
 			}
 		} catch (error) {
-			console.error("Failed to refresh free-shipping announcement", error);
+			console.error("Failed to refresh announcement bar", error);
 		}
 	}
 }
 
-customElements.define("announcement-free-shipping", AnnouncementFreeShipping);
+customElements.define("announcement-bar-live", AnnouncementBarLive);

@@ -22,21 +22,20 @@
 					class="announcement-bar__link link link--text focus-inset animate-arrow"
 				>
 			{%- endif -%}
-			<announcement-free-shipping
-				class="announcement-bar__message h5"
-				data-section-id="{{ section.id }}"
-			>
+			<p class="announcement-bar__message h5">
 				<span data-free-shipping-message>
 					{%- if remaining == 0 -%}
 						{{ 'sections.announcements.free_shipping_unlocked' | t }}
-					{%- else -%}
+					{%- elsif cart == empty -%}
 						{{ 'sections.announcements.free_shipping_from_html' | t: amount: remaining_money }}
+					{%- else -%}
+						{{ 'sections.announcements.free_shipping_remaining_html' | t: amount: remaining_money }}
 					{%- endif -%}
 				</span>
 				{%- if block.settings.link != blank -%}
 					{{- 'icon-arrow.svg' | inline_asset_content -}}
 				{%- endif -%}
-			</announcement-free-shipping>
+			</p>
 			{%- if block.settings.link != blank -%}
 				</a>
 			{%- endif -%}

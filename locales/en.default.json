@@ -272,6 +272,7 @@
       "announcement": "Announcement",
       "announcement_bar": "Announcement bar",
       "free_shipping_from_html": "Free shipping from {{ amount }}",
+      "free_shipping_remaining_html": "Only {{ amount }} away from free shipping",
       "free_shipping_unlocked": "Free shipping unlocked"
     },
 
