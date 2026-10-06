@@ -1,45 +1,41 @@
 {
 	"sections": {
-		"image_banner": {
-			"type": "image-banner",
+		"hero_background_slider": {
+			"type": "hero-background-slider",
 			"blocks": {
-				"heading": {
-					"type": "heading",
+				"slide_cheese": {
+					"type": "image",
 					"settings": {
-						"heading": "Maison Affinage",
-						"heading_size": "h0"
+						"image": "shopify://shop_images/maison-hero-cheese-board.jpg"
 					}
 				},
-				"text": {
-					"type": "text",
+				"slide_cows": {
+					"type": "image",
 					"settings": {
-						"text": "Cheeses aged in our cave, cut to order, and shipped cold.",
-						"text_style": "body"
+						"image": "shopify://shop_images/maison-hero-dairy-cows.jpg"
 					}
 				},
-				"button": {
-					"type": "buttons",
+				"slide_aging": {
+					"type": "image",
 					"settings": {
-						"button_label_1": "Shop the cave",
-						"button_link_1": "shopify://collections/all",
-						"button_style_secondary_1": false,
-						"button_label_2": "",
-						"button_link_2": "",
-						"button_style_secondary_2": false
+						"image": "shopify://shop_images/maison-hero-cheese-aging.jpg"
 					}
 				}
 			},
-			"block_order": ["heading", "text", "button"],
+			"block_order": ["slide_cheese", "slide_cows", "slide_aging"],
 			"settings": {
-				"image_overlay_opacity": 50,
+				"heading": "Maison Affinage",
+				"heading_size": "h0",
+				"text": "Cheeses aged in our cave, cut to order, and shipped cold.",
+				"button_label": "Shop the cave",
+				"button_link": "shopify://collections/all",
+				"button_style_secondary": false,
+				"content_alignment": "center",
 				"image_height": "large",
-				"desktop_content_position": "middle-center",
-				"show_text_box": false,
-				"desktop_content_alignment": "center",
-				"color_scheme": "scheme-3",
-				"mobile_content_alignment": "center",
-				"stack_images_on_mobile": false,
-				"show_text_below": false
+				"image_overlay_opacity": 50,
+				"autoplay_delay": 5000,
+				"show_pagination": true,
+				"color_scheme": "scheme-3"
 			}
 		},
 		"promises": {
@@ -216,7 +212,7 @@
 		}
 	},
 	"order": [
-		"image_banner",
+		"hero_background_slider",
 		"promises",
 		"collection_list",
 		"slider_products",
