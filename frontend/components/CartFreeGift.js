@@ -7,6 +7,7 @@ class CartFreeGift extends HTMLElement {
 		this.threshold = Number(this.dataset.threshold);
 		this.enabled = this.dataset.enabled === "true";
 		this.busy = false;
+		this.pendingSync = false;
 
 		if (!this.enabled || !this.variantId || !this.threshold) return;
 
@@ -39,7 +40,7 @@ class CartFreeGift extends HTMLElement {
 
 	async onCartUpdate(event) {
 		if (event?.source === SOURCE) return;
-		await this.sync(event?.cartData);
+		await this.sync();
 	}
 
 	async fetchCart() {
@@ -48,9 +49,16 @@ class CartFreeGift extends HTMLElement {
 		return response.json();
 	}
 
-	getGiftLine(cart) {
-		return (cart.items || []).find(
+	getGiftLines(cart) {
+		return (cart.items || []).filter(
 			(item) => Number(item.variant_id) === this.variantId,
+		);
+	}
+
+	getGiftQuantity(cart) {
+		return this.getGiftLines(cart).reduce(
+			(sum, item) => sum + Number(item.quantity || 0),
+			0,
 		);
 	}
 
@@ -65,43 +73,70 @@ class CartFreeGift extends HTMLElement {
 		return cart.attributes?.free_gift_declined === "true";
 	}
 
-	async sync(cartData) {
-		if (this.busy || !this.enabled) return;
+	async sync() {
+		if (!this.enabled) return;
+
+		if (this.busy) {
+			this.pendingSync = true;
+			return;
+		}
 
 		try {
 			this.busy = true;
-			const cart = cartData?.items ? cartData : await this.fetchCart();
-			const giftLine = this.getGiftLine(cart);
+			// Always read a fresh cart so a stale cartUpdate payload cannot trigger a second add.
+			const cart = await this.fetchCart();
+			const giftQty = this.getGiftQuantity(cart);
 			const eligible = this.getEligibleTotal(cart) >= this.threshold;
 			const declined = this.isDeclined(cart);
 
-			if (!eligible && giftLine) {
-				await this.removeGift({ clearDeclined: true });
+			if (!eligible) {
+				if (giftQty > 0) {
+					await this.setGiftQuantity(0, { clearDeclined: true });
+				}
 				return;
 			}
 
-			if (eligible && !declined && !giftLine) {
+			if (declined) {
+				if (giftQty > 0) {
+					await this.setGiftQuantity(0);
+				}
+				return;
+			}
+
+			if (giftQty === 0) {
 				await this.addGift();
+			} else if (giftQty > 1) {
+				await this.setGiftQuantity(1);
+			} else {
+				this.hideAddAgainButtons();
 			}
 		} catch (error) {
 			console.error("Free gift sync failed", error);
 		} finally {
 			this.busy = false;
+			if (this.pendingSync) {
+				this.pendingSync = false;
+				await this.sync();
+			}
 		}
 	}
 
 	async addAgain() {
-		if (this.busy || !this.enabled) return;
+		if (!this.enabled) return;
 
 		try {
-			this.busy = true;
+			this.hideAddAgainButtons();
 			await this.updateAttributes({ free_gift_declined: "" });
-			await this.addGift();
+			await this.sync();
 		} catch (error) {
 			console.error("Failed to add free gift again", error);
-		} finally {
-			this.busy = false;
 		}
+	}
+
+	hideAddAgainButtons() {
+		document
+			.querySelectorAll(".cart-free-gift")
+			.forEach((element) => element.remove());
 	}
 
 	async addGift() {
@@ -126,10 +161,10 @@ class CartFreeGift extends HTMLElement {
 		await this.publishCart();
 	}
 
-	async removeGift({ clearDeclined = false } = {}) {
+	async setGiftQuantity(quantity, { clearDeclined = false } = {}) {
 		const payload = {
 			updates: {
-				[this.variantId]: 0,
+				[this.variantId]: quantity,
 			},
 		};
 
@@ -142,7 +177,7 @@ class CartFreeGift extends HTMLElement {
 			body: JSON.stringify(payload),
 		});
 
-		if (!response.ok) throw new Error("Failed to remove free gift");
+		if (!response.ok) throw new Error("Failed to update free gift quantity");
 
 		await this.publishCart();
 	}
