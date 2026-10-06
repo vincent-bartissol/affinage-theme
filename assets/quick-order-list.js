@@ -145,27 +145,27 @@ if (!customElements.get('quick-order-list')) {
 
       getSectionsToRender() {
         return [
-          {
-            id: this.id,
-            section: this.dataset.section,
-            selector: `#${this.id}`,
-          },
-          {
-            id: 'cart-icon-bubble',
-            section: 'cart-icon-bubble',
-            selector: '#shopify-section-cart-icon-bubble',
-          },
-          {
-            id: `quick-order-list-live-region-text-${this.dataset.productId}`,
-            section: 'cart-live-region-text',
-            selector: '.shopify-section',
-          },
-          {
-            id: 'CartDrawer',
-            selector: '.drawer__inner',
-            section: 'cart-drawer',
-          },
-        ];
+					{
+						id: this.id,
+						section: this.dataset.section,
+						selector: `#${this.id}`,
+					},
+					{
+						id: "cart-icon-bubble",
+						section: "cart-icon-bubble",
+						selector: "#shopify-section-cart-icon-bubble",
+					},
+					{
+						id: `quick-order-list-live-region-text-${this.dataset.productId}`,
+						section: "cart-live-region-text",
+						selector: ".shopify-section",
+					},
+					{
+						id: "CartDrawer",
+						selector: ".cart-drawer__shell",
+						section: "cart-drawer",
+					},
+				];
       }
 
       toggleTableLoading(enable) {
