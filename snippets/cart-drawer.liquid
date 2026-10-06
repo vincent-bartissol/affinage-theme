@@ -490,7 +490,6 @@
 				</form>
 			</cart-drawer-items>
 			<div class="drawer__footer">
-				{% render 'cart-shipping-progress' %}
 				{%- if cart != empty -%}
 					{% render 'cart-pairing' %}
 				{%- endif -%}
@@ -518,6 +517,7 @@
 				<!-- Subtotals -->
 
 				<div class="cart-drawer__footer" {{ block.shopify_attributes }}>
+					{% render 'cart-shipping-progress' %}
 					{% render 'cart-free-gift' %}
 					<div>
 						{%- if cart.cart_level_discount_applications.size > 0 -%}

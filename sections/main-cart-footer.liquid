@@ -38,13 +38,13 @@
 			{%- endif -%}
 
 			<div class="cart__blocks">
-				{% render 'cart-shipping-progress' %}
 				{% for block in section.blocks %}
 					{%- case block.type -%}
 						{%- when '@app' -%}
 							{% render block %}
 						{%- when 'subtotal' -%}
 							<div class="js-contents" {{ block.shopify_attributes }}>
+								{% render 'cart-shipping-progress' %}
 								{% render 'cart-free-gift' %}
 								<div>
 									{%- if cart.cart_level_discount_applications.size > 0 -%}
