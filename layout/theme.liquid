@@ -309,6 +309,13 @@
 	</head>
 
 	<body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
+		{%- if request.page_type == 'product' and product.tags contains 'free-gift' -%}
+			<meta http-equiv="refresh" content="0;url={{ routes.root_url }}">
+			<script>
+				window.location.replace({{ routes.root_url | json }});
+			</script>
+		{%- endif -%}
+
 		<a class="skip-to-content-link button visually-hidden" href="#MainContent">
 			{{ 'accessibility.skip_to_text' | t }}
 		</a>
@@ -336,7 +343,9 @@
 		{% sections 'header-group' %}
 
 		<main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
-			{{ content_for_layout }}
+			{%- unless request.page_type == 'product' and product.tags contains 'free-gift' -%}
+				{{ content_for_layout }}
+			{%- endunless -%}
 		</main>
 
 		{% sections 'footer-group' %}
