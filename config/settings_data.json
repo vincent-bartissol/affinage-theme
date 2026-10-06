@@ -6,68 +6,68 @@
       "color_schemes": {
         "scheme-1": {
           "settings": {
-            "background": "#FFFFFF",
+            "background": "#F7F3EC",
             "background_gradient": "",
-            "text": "#121212",
-            "button": "#121212",
-            "button_label": "#FFFFFF",
-            "secondary_button_label": "#121212",
-            "shadow": "#121212"
+            "text": "#1C1915",
+            "button": "#1C1915",
+            "button_label": "#F7F3EC",
+            "secondary_button_label": "#1C1915",
+            "shadow": "#1C1915"
           }
         },
         "scheme-2": {
           "settings": {
-            "background": "#F3F3F3",
+            "background": "#EFE8DC",
             "background_gradient": "",
-            "text": "#121212",
-            "button": "#121212",
-            "button_label": "#F3F3F3",
-            "secondary_button_label": "#121212",
-            "shadow": "#121212"
+            "text": "#1C1915",
+            "button": "#1C1915",
+            "button_label": "#EFE8DC",
+            "secondary_button_label": "#1C1915",
+            "shadow": "#1C1915"
           }
         },
         "scheme-3": {
           "settings": {
-            "background": "#242833",
+            "background": "#1C1915",
             "background_gradient": "",
-            "text": "#FFFFFF",
-            "button": "#FFFFFF",
-            "button_label": "#000000",
-            "secondary_button_label": "#FFFFFF",
-            "shadow": "#121212"
+            "text": "#F7F3EC",
+            "button": "#C4833A",
+            "button_label": "#1C1915",
+            "secondary_button_label": "#F7F3EC",
+            "shadow": "#1C1915"
           }
         },
         "scheme-4": {
           "settings": {
-            "background": "#121212",
+            "background": "#2A241C",
             "background_gradient": "",
-            "text": "#FFFFFF",
-            "button": "#FFFFFF",
-            "button_label": "#121212",
-            "secondary_button_label": "#FFFFFF",
-            "shadow": "#121212"
+            "text": "#F7F3EC",
+            "button": "#F7F3EC",
+            "button_label": "#1C1915",
+            "secondary_button_label": "#F7F3EC",
+            "shadow": "#1C1915"
           }
         },
         "scheme-5": {
           "settings": {
-            "background": "#334FB4",
+            "background": "#C4833A",
             "background_gradient": "",
-            "text": "#FFFFFF",
-            "button": "#FFFFFF",
-            "button_label": "#334FB4",
-            "secondary_button_label": "#FFFFFF",
-            "shadow": "#121212"
+            "text": "#1C1915",
+            "button": "#1C1915",
+            "button_label": "#F7F3EC",
+            "secondary_button_label": "#1C1915",
+            "shadow": "#1C1915"
           }
         }
       },
-      "type_header_font": "assistant_n4",
-      "heading_scale": 100,
+      "type_header_font": "domine_n4",
+      "heading_scale": 110,
       "type_body_font": "assistant_n4",
       "body_scale": 100,
-      "page_width": 1200,
-      "spacing_sections": 0,
-      "spacing_grid_horizontal": 8,
-      "spacing_grid_vertical": 8,
+      "page_width": 1400,
+      "spacing_sections": 36,
+      "spacing_grid_horizontal": 16,
+      "spacing_grid_vertical": 16,
       "buttons_border_thickness": 1,
       "buttons_border_opacity": 100,
       "buttons_radius": 0,
@@ -92,7 +92,7 @@
       "card_style": "standard",
       "card_image_padding": 0,
       "card_text_alignment": "left",
-      "card_color_scheme": "scheme-2",
+      "card_color_scheme": "scheme-1",
       "card_border_thickness": 0,
       "card_border_opacity": 10,
       "card_corner_radius": 0,
@@ -103,7 +103,7 @@
       "collection_card_style": "standard",
       "collection_card_image_padding": 0,
       "collection_card_text_alignment": "left",
-      "collection_card_color_scheme": "scheme-2",
+      "collection_card_color_scheme": "scheme-1",
       "collection_card_border_thickness": 0,
       "collection_card_border_opacity": 10,
       "collection_card_corner_radius": 0,
@@ -166,10 +166,10 @@
       "predictive_search_show_vendor": false,
       "predictive_search_show_price": false,
       "currency_code_enabled": true,
-      "cart_type": "notification",
+      "cart_type": "drawer",
       "show_vendor": false,
       "show_cart_note": false,
-      "cart_drawer_collection": "",
+      "cart_drawer_collection": "featured",
       "sections": {
         "main-password-header": {
           "type": "main-password-header",

@@ -8,9 +8,9 @@
 				"announcement-bar-0": {
 					"type": "announcement",
 					"settings": {
-						"text": "Welcome to our store",
+						"text": "Cold-packed shipping across France — free from €60",
 						"text_alignment": "center",
-						"color_scheme": "scheme-1",
+						"color_scheme": "scheme-3",
 						"link": ""
 					}
 				}
