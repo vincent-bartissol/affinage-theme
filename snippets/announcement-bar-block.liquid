@@ -1,21 +1,57 @@
 {% comment %}
-	Renders one announcement-bar block (static text or live free-shipping message).
+	Renders one announcement-bar block (static text or live rewards message).
 	Accepts: block
 {% endcomment %}
 {%- liquid
-	assign free_shipping_threshold = settings.cart_free_shipping_threshold | default: 60 | times: 100
+	assign shipping_threshold = settings.cart_free_shipping_threshold | default: 0 | times: 100
+	assign gift_threshold = 0
+	assign gift_product = settings.cart_free_gift_product
+	if settings.cart_free_gift_enabled and gift_product != blank and settings.cart_free_gift_threshold > 0
+		assign gift_threshold = settings.cart_free_gift_threshold | times: 100
+	endif
+
+	assign eligible_total = 0
+	for item in cart.items
+		assign is_gift_line = false
+		if gift_product != blank and item.product.id == gift_product.id
+			assign is_gift_line = true
+		endif
+		unless is_gift_line
+			assign eligible_total = eligible_total | plus: item.final_line_price
+		endunless
+	endfor
+
+	assign shipping_unlocked = false
+	if shipping_threshold > 0 and eligible_total >= shipping_threshold
+		assign shipping_unlocked = true
+	endif
+	assign gift_unlocked = false
+	if gift_threshold > 0 and eligible_total >= gift_threshold
+		assign gift_unlocked = true
+	endif
+
+	assign shipping_remaining = shipping_threshold | minus: eligible_total
+	if shipping_remaining < 0
+		assign shipping_remaining = 0
+	endif
+	assign gift_remaining = gift_threshold | minus: eligible_total
+	if gift_remaining < 0
+		assign gift_remaining = 0
+	endif
+	assign shipping_remaining_money = shipping_remaining | money
+	assign gift_remaining_money = gift_remaining | money
+	assign shipping_from_money = shipping_threshold | money
+	assign gift_from_money = gift_threshold | money
+
+	assign rewards_active = false
+	if shipping_threshold > 0 or gift_threshold > 0
+		assign rewards_active = true
+	endif
 -%}
 
 {%- case block.type -%}
 	{%- when 'free_shipping' -%}
-		{%- if free_shipping_threshold > 0 -%}
-			{%- liquid
-				assign remaining = free_shipping_threshold | minus: cart.total_price
-				if remaining < 0
-					assign remaining = 0
-				endif
-				assign remaining_money = remaining | money
-			-%}
+		{%- if rewards_active -%}
 			{%- if block.settings.link != blank -%}
 				<a
 					href="{{ block.settings.link }}"
@@ -24,12 +60,22 @@
 			{%- endif -%}
 			<p class="announcement-bar__message h5">
 				<span data-free-shipping-message>
-					{%- if remaining == 0 -%}
-						{{ 'sections.announcements.free_shipping_unlocked' | t }}
-					{%- elsif cart == empty -%}
-						{{ 'sections.announcements.free_shipping_from_html' | t: amount: remaining_money }}
+					{%- if cart == empty -%}
+						{%- if shipping_threshold > 0 -%}
+							{{ 'sections.announcements.free_shipping_from_html' | t: amount: shipping_from_money }}
+						{%- else -%}
+							{{ 'sections.announcements.free_gift_from_html' | t: amount: gift_from_money }}
+						{%- endif -%}
+					{%- elsif shipping_threshold > 0 and shipping_unlocked == false -%}
+						{{ 'sections.announcements.free_shipping_remaining_html' | t: amount: shipping_remaining_money }}
+					{%- elsif gift_threshold > 0 and gift_unlocked == false -%}
+						{{ 'sections.announcements.free_gift_remaining_html' | t: amount: gift_remaining_money }}
+					{%- elsif gift_threshold > 0 and shipping_threshold > 0 -%}
+						{{ 'sections.announcements.rewards_unlocked' | t }}
+					{%- elsif gift_threshold > 0 -%}
+						{{ 'sections.announcements.free_gift_unlocked' | t }}
 					{%- else -%}
-						{{ 'sections.announcements.free_shipping_remaining_html' | t: amount: remaining_money }}
+						{{ 'sections.announcements.free_shipping_unlocked' | t }}
 					{%- endif -%}
 				</span>
 				{%- if block.settings.link != blank -%}

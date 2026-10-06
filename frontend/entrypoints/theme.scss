@@ -60,9 +60,10 @@
 
 .cart-shipping-progress__track {
 	display: block;
+	position: relative;
 	height: 3px;
 	background: rgba(var(--color-foreground), 0.12);
-	overflow: hidden;
+	overflow: visible;
 }
 
 .cart-shipping-progress__bar {
@@ -70,6 +71,21 @@
 	height: 100%;
 	background: var(--maison-amber);
 	transition: width 0.35s ease;
+}
+
+.cart-rewards-progress__marker {
+	position: absolute;
+	top: 50%;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: rgba(var(--color-foreground), 0.35);
+	border: 1px solid rgba(var(--color-background), 1);
+	transform: translate(-50%, -50%);
+}
+
+.cart-rewards-progress__marker--unlocked {
+	background: var(--maison-amber);
 }
 
 .cart-pairing {
