@@ -69,8 +69,9 @@ jobs:
       - name: Check if theme exists
         id: check-theme
         run: |
-          themes="$(pnpm exec shopify theme list --json --name "${THEME_NAME}" --store vincent-store-dev.myshopify.com --password "${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}")"
-          if echo "${themes}" | jq -e --arg name "${THEME_NAME}" '(if type == "array" then . else (.themes // []) end) | any(.name == $name)' > /dev/null; then
+          # Shopify CLI exits 1 when --name matches nothing; treat that as "missing".
+          themes="$(pnpm exec shopify theme list --json --name "${THEME_NAME}" --store vincent-store-dev.myshopify.com --password "${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}" 2>/dev/null || true)"
+          if echo "${themes}" | jq -e --arg name "${THEME_NAME}" '(if type == "array" then . else (.themes // []) end) | any(.name == $name)' > /dev/null 2>&1; then
             echo "Theme exists"
             echo "THEME_EXISTS=true" >> "${GITHUB_ENV}"
           else
@@ -81,7 +82,11 @@ jobs:
       - name: Create new theme if it doesn't exist
         if: env.THEME_EXISTS == 'false'
         run: |
-          pnpm exec shopify theme push --unpublished --theme ${{ env.THEME_NAME }} --store vincent-store-dev.myshopify.com --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+          pnpm exec shopify theme push \
+            --unpublished \
+            --theme "${{ env.THEME_NAME }}" \
+            --store vincent-store-dev.myshopify.com \
+            --password "${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}"
 
       - name: Deploy theme to Shopify Development
         run: |
