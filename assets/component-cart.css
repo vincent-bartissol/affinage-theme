@@ -198,7 +198,9 @@ cart-items {
 
 .cart-item__free-gift-badge {
   margin: 0 0 0.4rem;
-  color: rgba(var(--color-foreground), 0.75);
+  color: rgb(var(--color-foreground));
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 
 .cart-item__free-gift-qty {

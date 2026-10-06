@@ -335,11 +335,12 @@
       "free_gift_badge": "Free gift",
       "free_gift_add_again": "Add free gift again",
       "free_sample_badge": "Free sample",
-      "free_sample_title": "Choose your free samples",
-      "free_sample_help": "Select up to {{ max }} free samples.",
-      "free_sample_add": "Add sample",
+      "free_sample_title": "Your free samples",
+      "free_sample_help": "Pick up to {{ max }}. They are added to your cart for free.",
+      "free_sample_add": "Add",
       "free_sample_remove": "Remove",
-      "free_sample_max_reached": "Maximum samples selected"
+      "free_sample_selected": "In your cart",
+      "free_sample_max_reached": "Maximum reached. Remove one sample to choose another."
     },
     "footer": {
       "payment": "Payment methods"

@@ -194,10 +194,16 @@
 
 											<ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
 												{%- for discount in item.line_level_discount_allocations -%}
-													<li class="discounts__discount">
-														{{- 'icon-discount.svg' | inline_asset_content -}}
-														{{ discount.discount_application.title | escape }}
-													</li>
+													{%- comment -%}
+														Skip €0 allocations. Automatic free-gift discounts sometimes attach
+														a zero-amount application to other lines and split them in the cart.
+													{%- endcomment -%}
+													{%- if discount.amount > 0 -%}
+														<li class="discounts__discount">
+															{{- 'icon-discount.svg' | inline_asset_content -}}
+															{{ discount.discount_application.title | escape }}
+														</li>
+													{%- endif -%}
 												{%- endfor -%}
 											</ul>
 										</td>
@@ -493,6 +499,7 @@
 							</tbody>
 						</table>
 					{%- endif -%}
+					{% render 'cart-free-sample', layout: 'page' %}
 				</div>
 			</div>
 

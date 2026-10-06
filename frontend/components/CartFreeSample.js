@@ -189,17 +189,24 @@ class CartFreeSample extends HTMLElement {
 		const selected = new Set(selectedIds);
 		const atMax = selectedIds.length >= this.max;
 
+		document.querySelectorAll(".cart-free-sample").forEach((picker) => {
+			picker.classList.toggle("is-at-max", atMax);
+		});
+
 		document.querySelectorAll(".cart-free-sample__option").forEach((option) => {
 			const variantId = Number(option.dataset.variantId);
 			const isSelected = selected.has(variantId);
+			const isDisabled = !isSelected && atMax;
 			option.classList.toggle("is-selected", isSelected);
-			option.classList.toggle("is-disabled", !isSelected && atMax);
+			option.classList.toggle("is-disabled", isDisabled);
+			option.hidden = false;
+			option.setAttribute("aria-disabled", isDisabled ? "true" : "false");
 
 			const addButton = option.querySelector("[data-free-sample-add]");
 			const removeButton = option.querySelector("[data-free-sample-remove]");
 			if (addButton) {
 				addButton.hidden = isSelected;
-				addButton.disabled = !isSelected && atMax;
+				addButton.disabled = isDisabled;
 			}
 			if (removeButton) {
 				removeButton.hidden = !isSelected;
@@ -209,6 +216,12 @@ class CartFreeSample extends HTMLElement {
 		document.querySelectorAll("[data-free-sample-count]").forEach((element) => {
 			element.textContent = String(selectedIds.length);
 		});
+
+		document
+			.querySelectorAll("[data-free-sample-max-note]")
+			.forEach((element) => {
+				element.hidden = !atMax;
+			});
 	}
 
 	async addSample(variantId) {
