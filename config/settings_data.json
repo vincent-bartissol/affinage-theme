@@ -171,9 +171,9 @@
       "show_cart_note": false,
       "cart_drawer_collection": "featured",
       "cart_free_shipping_threshold": 60,
-      "cart_free_gift_enabled": false,
+      "cart_free_gift_enabled": true,
       "cart_free_gift_product": "cadeau-offert",
-      "cart_free_gift_threshold": 80,
+      "cart_free_gift_threshold": 100,
       "sections": {
         "main-password-header": {
           "type": "main-password-header",
