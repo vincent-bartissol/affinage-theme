@@ -317,7 +317,9 @@
       },
       "free_shipping_unlocked": "You’ve unlocked free cold shipping.",
       "free_shipping_remaining_html": "Add {{ amount }} more for free cold shipping.",
-      "pairing_title": "Add a pairing"
+      "pairing_title": "Add a pairing",
+      "free_gift_badge": "Free gift",
+      "free_gift_add_again": "Add free gift again"
     },
     "footer": {
       "payment": "Payment methods"

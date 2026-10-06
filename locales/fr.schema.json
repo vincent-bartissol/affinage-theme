@@ -261,6 +261,20 @@
             "label": "Collection",
             "info": "Affiché lorsque le panier coulissant est vide"
           }
+        },
+        "cart_free_gift": {
+          "header": "Cadeau offert",
+          "enabled": {
+            "label": "Activer le cadeau offert"
+          },
+          "product": {
+            "label": "Produit cadeau",
+            "info": "Ajouté automatiquement lorsque le panier atteint le seuil. Associez une réduction automatique Achetez X obtenez Y pour le rendre gratuit."
+          },
+          "threshold": {
+            "label": "Seuil du cadeau offert",
+            "info": "Montant dans la devise de la boutique (ex. 80 pour 80 €). Mettre 0 pour désactiver."
+          }
         }
       }
     },
