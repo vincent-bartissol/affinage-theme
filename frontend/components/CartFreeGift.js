@@ -40,7 +40,15 @@ class CartFreeGift extends HTMLElement {
 
 	async onCartUpdate(event) {
 		if (event?.source === SOURCE) return;
-		await this.sync();
+
+		const cart = event?.cartData;
+		// Hide the gift row before the next paint when the cart payload already
+		// shows we are under the threshold (or the gift was declined).
+		if (cart && this.shouldRemoveGift(cart)) {
+			this.hideGiftLines();
+		}
+
+		await this.sync(cart);
 	}
 
 	async fetchCart() {
@@ -73,7 +81,20 @@ class CartFreeGift extends HTMLElement {
 		return cart.attributes?.free_gift_declined === "true";
 	}
 
-	async sync() {
+	shouldRemoveGift(cart) {
+		if (this.getGiftQuantity(cart) <= 0) return false;
+		return (
+			this.getEligibleTotal(cart) < this.threshold || this.isDeclined(cart)
+		);
+	}
+
+	hideGiftLines() {
+		document.querySelectorAll(".cart-item--free-gift").forEach((element) => {
+			element.hidden = true;
+		});
+	}
+
+	async sync(cartFromEvent) {
 		if (!this.enabled) return;
 
 		if (this.busy) {
@@ -83,14 +104,16 @@ class CartFreeGift extends HTMLElement {
 
 		try {
 			this.busy = true;
-			// Always read a fresh cart so a stale cartUpdate payload cannot trigger a second add.
-			const cart = await this.fetchCart();
+			// Prefer the event payload to skip a round-trip; fall back to a fresh
+			// cart when syncing without one (initial load / queued follow-up).
+			const cart = cartFromEvent || (await this.fetchCart());
 			const giftQty = this.getGiftQuantity(cart);
 			const eligible = this.getEligibleTotal(cart) >= this.threshold;
 			const declined = this.isDeclined(cart);
 
 			if (!eligible) {
 				if (giftQty > 0) {
+					this.hideGiftLines();
 					await this.setGiftQuantity(0, { clearDeclined: true });
 				}
 				return;
@@ -98,6 +121,7 @@ class CartFreeGift extends HTMLElement {
 
 			if (declined) {
 				if (giftQty > 0) {
+					this.hideGiftLines();
 					await this.setGiftQuantity(0);
 				}
 				return;
