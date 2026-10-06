@@ -468,6 +468,9 @@
         }
       },
       "blocks": {
+        "free_shipping": {
+          "name": "Free shipping"
+        },
         "announcement": {
           "name": "Announcement",
           "settings": {

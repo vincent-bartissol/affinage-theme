@@ -355,7 +355,9 @@
       "next_announcement": "Annonce suivante",
       "carousel": "Carrousel",
       "announcement": "Annonce",
-      "announcement_bar": "Barre d’annonces"
+      "announcement_bar": "Barre d’annonces",
+      "free_shipping_from_html": "Livraison offerte dès {{ amount }}",
+      "free_shipping_unlocked": "Livraison offerte débloquée"
     },
     "quick_order_list": {
       "product_total": "Sous-total des produits",
