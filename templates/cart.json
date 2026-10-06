@@ -33,6 +33,7 @@
 				"navigation": true,
 				"scrollbar": false,
 				"loop": true,
+				"show_quick_add": true,
 				"color_scheme": "scheme-1"
 			}
 		}
