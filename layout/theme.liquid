@@ -309,7 +309,11 @@
 	</head>
 
 	<body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
-		{%- if request.page_type == 'product' and product.tags contains 'free-gift' -%}
+		{%- if request.page_type == 'product'
+			and product.tags contains 'free-gift'
+			or request.page_type == 'product'
+			and product.tags contains 'free-sample'
+		-%}
 			<meta http-equiv="refresh" content="0;url={{ routes.root_url }}">
 			<script>
 				window.location.replace({{ routes.root_url | json }});
@@ -331,6 +335,27 @@
 			if settings.cart_free_gift_enabled and free_gift_product != blank and free_gift_threshold > 0
 				assign free_gift_enabled = true
 			endif
+
+			assign free_sample_collection = settings.cart_free_sample_collection
+			assign free_sample_threshold = settings.cart_free_sample_threshold | default: 0 | times: 100
+			assign free_sample_max = settings.cart_free_sample_max | default: 2
+			if free_sample_max < 1
+				assign free_sample_max = 1
+			endif
+			assign free_sample_enabled = false
+			assign free_sample_variant_ids = ''
+			if settings.cart_free_sample_enabled and free_sample_collection != blank and free_sample_threshold > 0 and free_sample_collection.products_count > 0
+				assign free_sample_enabled = true
+				for sample_product in free_sample_collection.products
+					assign sample_variant = sample_product.selected_or_first_available_variant
+					if sample_variant != blank and sample_variant.available
+						if free_sample_variant_ids != blank
+							assign free_sample_variant_ids = free_sample_variant_ids | append: ','
+						endif
+						assign free_sample_variant_ids = free_sample_variant_ids | append: sample_variant.id
+					endif
+				endfor
+			endif
 		-%}
 		<cart-free-gift
 			data-enabled="{{ free_gift_enabled }}"
@@ -339,11 +364,26 @@
 				data-threshold="{{ free_gift_threshold }}"
 			{% endif %}
 		></cart-free-gift>
+		<cart-free-sample
+			data-enabled="{{ free_sample_enabled }}"
+			{% if free_sample_enabled %}
+				data-threshold="{{ free_sample_threshold }}"
+				data-max="{{ free_sample_max }}"
+				data-variant-ids="{{ free_sample_variant_ids }}"
+				{% if free_gift_enabled %}
+					data-gift-variant-id="{{ free_gift_product.selected_or_first_available_variant.id }}"
+				{% endif %}
+			{% endif %}
+		></cart-free-sample>
 
 		{% sections 'header-group' %}
 
 		<main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
-			{%- unless request.page_type == 'product' and product.tags contains 'free-gift' -%}
+			{%- unless request.page_type == 'product'
+				and product.tags contains 'free-gift'
+				or request.page_type == 'product'
+				and product.tags contains 'free-sample'
+			-%}
 				{{ content_for_layout }}
 			{%- endunless -%}
 		</main>

@@ -277,7 +277,10 @@
       "free_gift_from_html": "Free gift from {{ amount }}",
       "free_gift_remaining_html": "Only {{ amount }} away from your free gift",
       "free_gift_unlocked": "Free gift unlocked",
-      "rewards_unlocked": "Free shipping and free gift unlocked"
+      "free_sample_from_html": "Free samples from {{ amount }}",
+      "free_sample_remaining_html": "Only {{ amount }} away from free samples",
+      "free_sample_unlocked": "Free samples unlocked",
+      "rewards_unlocked": "All cart rewards unlocked"
     },
 
     "header": {
@@ -324,10 +327,19 @@
       "free_shipping_unlocked_gift_remaining_html": "Free cold shipping unlocked. Add {{ amount }} more for your free gift.",
       "free_gift_remaining_html": "Add {{ amount }} more for your free gift.",
       "free_gift_unlocked": "You’ve unlocked your free gift.",
-      "rewards_unlocked": "Free cold shipping and your free gift are unlocked.",
+      "free_gift_unlocked_sample_remaining_html": "Free gift unlocked. Add {{ amount }} more for free samples.",
+      "free_sample_remaining_html": "Add {{ amount }} more for free samples.",
+      "free_sample_unlocked": "You’ve unlocked free samples.",
+      "rewards_unlocked": "All cart rewards are unlocked.",
       "pairing_title": "Add a pairing",
       "free_gift_badge": "Free gift",
-      "free_gift_add_again": "Add free gift again"
+      "free_gift_add_again": "Add free gift again",
+      "free_sample_badge": "Free sample",
+      "free_sample_title": "Choose your free samples",
+      "free_sample_help": "Select up to {{ max }} free samples.",
+      "free_sample_add": "Add sample",
+      "free_sample_remove": "Remove",
+      "free_sample_max_reached": "Maximum samples selected"
     },
     "footer": {
       "payment": "Payment methods"

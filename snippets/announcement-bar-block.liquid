@@ -4,19 +4,29 @@
 {% endcomment %}
 {%- liquid
 	assign shipping_threshold = settings.cart_free_shipping_threshold | default: 0 | times: 100
+
 	assign gift_threshold = 0
 	assign gift_product = settings.cart_free_gift_product
 	if settings.cart_free_gift_enabled and gift_product != blank and settings.cart_free_gift_threshold > 0
 		assign gift_threshold = settings.cart_free_gift_threshold | times: 100
 	endif
 
+	assign sample_threshold = 0
+	assign sample_collection = settings.cart_free_sample_collection
+	if settings.cart_free_sample_enabled and sample_collection != blank and settings.cart_free_sample_threshold > 0
+		assign sample_threshold = settings.cart_free_sample_threshold | times: 100
+	endif
+
 	assign eligible_total = 0
 	for item in cart.items
-		assign is_gift_line = false
+		assign is_reward_line = false
 		if gift_product != blank and item.product.id == gift_product.id
-			assign is_gift_line = true
+			assign is_reward_line = true
 		endif
-		unless is_gift_line
+		if item.product.tags contains 'free-sample' or item.properties._sample == 'true'
+			assign is_reward_line = true
+		endif
+		unless is_reward_line
 			assign eligible_total = eligible_total | plus: item.final_line_price
 		endunless
 	endfor
@@ -29,6 +39,10 @@
 	if gift_threshold > 0 and eligible_total >= gift_threshold
 		assign gift_unlocked = true
 	endif
+	assign sample_unlocked = false
+	if sample_threshold > 0 and eligible_total >= sample_threshold
+		assign sample_unlocked = true
+	endif
 
 	assign shipping_remaining = shipping_threshold | minus: eligible_total
 	if shipping_remaining < 0
@@ -38,13 +52,19 @@
 	if gift_remaining < 0
 		assign gift_remaining = 0
 	endif
+	assign sample_remaining = sample_threshold | minus: eligible_total
+	if sample_remaining < 0
+		assign sample_remaining = 0
+	endif
 	assign shipping_remaining_money = shipping_remaining | money
 	assign gift_remaining_money = gift_remaining | money
+	assign sample_remaining_money = sample_remaining | money
 	assign shipping_from_money = shipping_threshold | money
 	assign gift_from_money = gift_threshold | money
+	assign sample_from_money = sample_threshold | money
 
 	assign rewards_active = false
-	if shipping_threshold > 0 or gift_threshold > 0
+	if shipping_threshold > 0 or gift_threshold > 0 or sample_threshold > 0
 		assign rewards_active = true
 	endif
 -%}
@@ -63,17 +83,19 @@
 					{%- if cart == empty -%}
 						{%- if shipping_threshold > 0 -%}
 							{{ 'sections.announcements.free_shipping_from_html' | t: amount: shipping_from_money }}
-						{%- else -%}
+						{%- elsif gift_threshold > 0 -%}
 							{{ 'sections.announcements.free_gift_from_html' | t: amount: gift_from_money }}
+						{%- else -%}
+							{{ 'sections.announcements.free_sample_from_html' | t: amount: sample_from_money }}
 						{%- endif -%}
 					{%- elsif shipping_threshold > 0 and shipping_unlocked == false -%}
 						{{ 'sections.announcements.free_shipping_remaining_html' | t: amount: shipping_remaining_money }}
 					{%- elsif gift_threshold > 0 and gift_unlocked == false -%}
 						{{ 'sections.announcements.free_gift_remaining_html' | t: amount: gift_remaining_money }}
-					{%- elsif gift_threshold > 0 and shipping_threshold > 0 -%}
+					{%- elsif sample_threshold > 0 and sample_unlocked == false -%}
+						{{ 'sections.announcements.free_sample_remaining_html' | t: amount: sample_remaining_money }}
+					{%- elsif sample_threshold > 0 or gift_threshold > 0 -%}
 						{{ 'sections.announcements.rewards_unlocked' | t }}
-					{%- elsif gift_threshold > 0 -%}
-						{{ 'sections.announcements.free_gift_unlocked' | t }}
 					{%- else -%}
 						{{ 'sections.announcements.free_shipping_unlocked' | t }}
 					{%- endif -%}

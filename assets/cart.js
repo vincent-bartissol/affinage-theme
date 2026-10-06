@@ -26,6 +26,33 @@ class CartRemoveButton extends HTMLElement {
       }
     }
 
+    if (this.hasAttribute('data-free-sample')) {
+      try {
+        const variantId = Number(
+          this.querySelector('[data-variant-id]')?.dataset.variantId ||
+            this.closest('tr')?.querySelector('[data-quantity-variant-id]')?.dataset
+              .quantityVariantId,
+        );
+        if (variantId) {
+          const cartResponse = await fetch(`${routes.cart_url}.js`);
+          const cart = await cartResponse.json();
+          const current = String(cart.attributes?.free_sample_variant_ids || '')
+            .split(',')
+            .map((id) => Number(id.trim()))
+            .filter(Boolean)
+            .filter((id) => id !== variantId);
+          await fetch(`${routes.cart_update_url}`, {
+            ...fetchConfig(),
+            body: JSON.stringify({
+              attributes: { free_sample_variant_ids: current.join(',') },
+            }),
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     cartItems.updateQuantity(this.dataset.index, 0, event);
   }
 }

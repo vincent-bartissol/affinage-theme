@@ -73,6 +73,7 @@ class CartFreeGift extends HTMLElement {
 	getEligibleTotal(cart) {
 		return (cart.items || []).reduce((sum, item) => {
 			if (Number(item.variant_id) === this.variantId) return sum;
+			if (item.properties?._sample === "true") return sum;
 			return sum + Number(item.final_line_price || 0);
 		}, 0);
 	}

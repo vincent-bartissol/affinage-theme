@@ -350,6 +350,24 @@
             "label": "Free gift threshold",
             "info": "Amount in shop currency (e.g. 80 for €80). Set to 0 to disable."
           }
+        },
+        "cart_free_sample": {
+          "header": "Free samples",
+          "enabled": {
+            "label": "Enable free samples"
+          },
+          "collection": {
+            "label": "Sample collection",
+            "info": "Products the customer can choose from on the cart. Use €0 products tagged free-sample."
+          },
+          "threshold": {
+            "label": "Free samples threshold",
+            "info": "Amount in shop currency (e.g. 150 for €150). Set to 0 to disable."
+          },
+          "max": {
+            "label": "Maximum samples",
+            "info": "Maximum number of free samples the customer can add to the cart."
+          }
         }
       }
     },

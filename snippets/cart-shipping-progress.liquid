@@ -1,22 +1,32 @@
 {% comment %}
-	Cart rewards progress: free shipping and/or free gift.
-	Eligible total excludes the configured free-gift product line.
+	Cart rewards progress: free shipping, free gift, and/or free samples.
+	Eligible total excludes configured free-gift and free-sample lines.
 {% endcomment %}
 {%- liquid
 	assign shipping_threshold = settings.cart_free_shipping_threshold | default: 0 | times: 100
+
 	assign gift_threshold = 0
 	assign gift_product = settings.cart_free_gift_product
 	if settings.cart_free_gift_enabled and gift_product != blank and settings.cart_free_gift_threshold > 0
 		assign gift_threshold = settings.cart_free_gift_threshold | times: 100
 	endif
 
+	assign sample_threshold = 0
+	assign sample_collection = settings.cart_free_sample_collection
+	if settings.cart_free_sample_enabled and sample_collection != blank and settings.cart_free_sample_threshold > 0
+		assign sample_threshold = settings.cart_free_sample_threshold | times: 100
+	endif
+
 	assign eligible_total = 0
 	for item in cart.items
-		assign is_gift_line = false
+		assign is_reward_line = false
 		if gift_product != blank and item.product.id == gift_product.id
-			assign is_gift_line = true
+			assign is_reward_line = true
 		endif
-		unless is_gift_line
+		if item.product.tags contains 'free-sample' or item.properties._sample == 'true'
+			assign is_reward_line = true
+		endif
+		unless is_reward_line
 			assign eligible_total = eligible_total | plus: item.final_line_price
 		endunless
 	endfor
@@ -31,9 +41,17 @@
 		assign gift_unlocked = true
 	endif
 
+	assign sample_unlocked = false
+	if sample_threshold > 0 and eligible_total >= sample_threshold
+		assign sample_unlocked = true
+	endif
+
 	assign target_threshold = shipping_threshold
 	if gift_threshold > target_threshold
 		assign target_threshold = gift_threshold
+	endif
+	if sample_threshold > target_threshold
+		assign target_threshold = sample_threshold
 	endif
 
 	assign shipping_marker = 0
@@ -41,6 +59,14 @@
 		assign shipping_marker = shipping_threshold | times: 100.0 | divided_by: target_threshold
 		if shipping_marker > 100
 			assign shipping_marker = 100
+		endif
+	endif
+
+	assign gift_marker = 0
+	if target_threshold > 0 and gift_threshold > 0
+		assign gift_marker = gift_threshold | times: 100.0 | divided_by: target_threshold
+		if gift_marker > 100
+			assign gift_marker = 100
 		endif
 	endif
 
@@ -60,8 +86,13 @@
 	if gift_remaining < 0
 		assign gift_remaining = 0
 	endif
+	assign sample_remaining = sample_threshold | minus: eligible_total
+	if sample_remaining < 0
+		assign sample_remaining = 0
+	endif
 	assign shipping_remaining_money = shipping_remaining | money
 	assign gift_remaining_money = gift_remaining | money
+	assign sample_remaining_money = sample_remaining | money
 
 	assign show_rewards = false
 	if cart != empty and target_threshold > 0
@@ -72,36 +103,47 @@
 {%- if show_rewards -%}
 	<div class="cart-shipping-progress cart-rewards-progress" role="status">
 		<span class="cart-shipping-progress__label">
-			{%- if shipping_threshold > 0 and gift_threshold > 0 -%}
-				{%- if shipping_unlocked == false -%}
-					{{ 'sections.cart.free_shipping_remaining_html' | t: amount: shipping_remaining_money }}
-				{%- elsif gift_unlocked == false -%}
+			{%- if shipping_threshold > 0 and shipping_unlocked == false -%}
+				{{ 'sections.cart.free_shipping_remaining_html' | t: amount: shipping_remaining_money }}
+			{%- elsif gift_threshold > 0 and gift_unlocked == false -%}
+				{%- if shipping_threshold > 0 -%}
 					{{ 'sections.cart.free_shipping_unlocked_gift_remaining_html' | t: amount: gift_remaining_money }}
 				{%- else -%}
-					{{ 'sections.cart.rewards_unlocked' | t }}
+					{{ 'sections.cart.free_gift_remaining_html' | t: amount: gift_remaining_money }}
 				{%- endif -%}
-			{%- elsif shipping_threshold > 0 -%}
-				{%- if shipping_unlocked -%}
-					{{ 'sections.cart.free_shipping_unlocked' | t }}
+			{%- elsif sample_threshold > 0 and sample_unlocked == false -%}
+				{%- if gift_threshold > 0 -%}
+					{{ 'sections.cart.free_gift_unlocked_sample_remaining_html' | t: amount: sample_remaining_money }}
 				{%- else -%}
-					{{ 'sections.cart.free_shipping_remaining_html' | t: amount: shipping_remaining_money }}
+					{{ 'sections.cart.free_sample_remaining_html' | t: amount: sample_remaining_money }}
 				{%- endif -%}
-			{%- elsif gift_threshold > 0 -%}
-				{%- if gift_unlocked -%}
+			{%- elsif sample_threshold > 0 or gift_threshold > 0 or shipping_threshold > 0 -%}
+				{%- if sample_threshold > 0 and gift_threshold > 0 and shipping_threshold > 0 -%}
+					{{ 'sections.cart.rewards_unlocked' | t }}
+				{%- elsif sample_threshold > 0 -%}
+					{{ 'sections.cart.free_sample_unlocked' | t }}
+				{%- elsif gift_threshold > 0 -%}
 					{{ 'sections.cart.free_gift_unlocked' | t }}
 				{%- else -%}
-					{{ 'sections.cart.free_gift_remaining_html' | t: amount: gift_remaining_money }}
+					{{ 'sections.cart.free_shipping_unlocked' | t }}
 				{%- endif -%}
 			{%- endif -%}
 		</span>
 
 		<span class="cart-shipping-progress__track" aria-hidden="true">
 			<span class="cart-shipping-progress__bar" style="width: {{ progress }}%"></span>
-			{%- if shipping_threshold > 0 and gift_threshold > 0 and shipping_marker > 0 and shipping_marker < 100 -%}
+			{%- if shipping_threshold > 0 and shipping_marker > 0 and shipping_marker < 100 -%}
 				<span
 					class="cart-rewards-progress__marker{% if shipping_unlocked %} cart-rewards-progress__marker--unlocked{% endif %}"
 					style="left: {{ shipping_marker }}%"
 					title="{{ 'sections.cart.free_shipping_unlocked' | t | escape }}"
+				></span>
+			{%- endif -%}
+			{%- if gift_threshold > 0 and gift_marker > 0 and gift_marker < 100 -%}
+				<span
+					class="cart-rewards-progress__marker{% if gift_unlocked %} cart-rewards-progress__marker--unlocked{% endif %}"
+					style="left: {{ gift_marker }}%"
+					title="{{ 'sections.cart.free_gift_unlocked' | t | escape }}"
 				></span>
 			{%- endif -%}
 		</span>
