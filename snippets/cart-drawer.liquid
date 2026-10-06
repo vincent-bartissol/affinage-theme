@@ -499,6 +499,7 @@
 								</table>
 							</div>
 						{%- endif -%}
+						{% render 'cart-free-sample', layout: 'drawer' %}
 						<p id="CartDrawer-LiveRegionText" class="visually-hidden" role="status"></p>
 						<p id="CartDrawer-LineItemStatus" class="visually-hidden" aria-hidden="true" role="status">
 							{{ 'accessibility.loading' | t }}
@@ -537,7 +538,6 @@
 				<div class="cart-drawer__footer" {{ block.shopify_attributes }}>
 					{% render 'cart-shipping-progress' %}
 					{% render 'cart-free-gift' %}
-					{% render 'cart-free-sample' %}
 					<div>
 						{%- if cart.cart_level_discount_applications.size > 0 -%}
 							<ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
