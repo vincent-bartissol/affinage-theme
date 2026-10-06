@@ -36,7 +36,7 @@
 					"type": "buy_buttons",
 					"settings": {
 						"show_dynamic_checkout": true,
-						"show_gift_card_recipient": true
+						"show_gift_card_recipient": false
 					}
 				},
 				"description": {
@@ -45,36 +45,27 @@
 				"collapsible-row-0": {
 					"type": "collapsible_tab",
 					"settings": {
-						"heading": "Materials",
-						"icon": "leather",
-						"content": "",
+						"heading": "Milk & origin",
+						"icon": "dairy",
+						"content": "<p>Ask our counter for the producer, milk type, and aging for this cut.</p>",
 						"page": ""
 					}
 				},
 				"collapsible-row-1": {
 					"type": "collapsible_tab",
 					"settings": {
-						"heading": "Shipping & Returns",
+						"heading": "Shipping & storage",
 						"icon": "truck",
-						"content": "",
+						"content": "<p>Ships cold-packed. Keep refrigerated and bring to room temperature 30 minutes before serving.</p>",
 						"page": ""
 					}
 				},
 				"collapsible-row-2": {
 					"type": "collapsible_tab",
 					"settings": {
-						"heading": "Dimensions",
-						"icon": "ruler",
-						"content": "",
-						"page": ""
-					}
-				},
-				"collapsible-row-3": {
-					"type": "collapsible_tab",
-					"settings": {
-						"heading": "Care Instructions",
+						"heading": "Pairing",
 						"icon": "heart",
-						"content": "",
+						"content": "<p>See the tasting note on each product for wine, bread, and fruit ideas.</p>",
 						"page": ""
 					}
 				},
@@ -97,61 +88,28 @@
 				"collapsible-row-0",
 				"collapsible-row-1",
 				"collapsible-row-2",
-				"collapsible-row-3",
 				"share"
 			],
 			"settings": {
 				"enable_sticky_info": true,
-				"gallery_layout": "stacked",
+				"gallery_layout": "thumbnail",
 				"media_size": "large",
 				"constrain_to_viewport": true,
-				"mobile_thumbnails": "hide",
+				"mobile_thumbnails": "show",
 				"hide_variants": true,
 				"enable_video_looping": false,
 				"padding_top": 36,
 				"padding_bottom": 12
 			}
 		},
-		"image-with-text": {
-			"type": "image-with-text",
-			"blocks": {
-				"image-with-text-0": {
-					"type": "heading",
-					"settings": {
-						"heading": "Image with text",
-						"heading_size": "h1"
-					}
-				},
-				"image-with-text-1": {
-					"type": "text",
-					"settings": {
-						"text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
-						"text_style": "body"
-					}
-				}
-			},
-			"block_order": ["image-with-text-0", "image-with-text-1"],
-			"settings": {
-				"height": "small",
-				"desktop_image_width": "medium",
-				"layout": "text_first",
-				"desktop_content_position": "top",
-				"desktop_content_alignment": "left",
-				"content_layout": "no-overlap",
-				"color_scheme": "scheme-2",
-				"mobile_content_alignment": "left",
-				"padding_top": 36,
-				"padding_bottom": 36
-			}
-		},
-		"multicolumn": {
+		"promises": {
 			"type": "multicolumn",
 			"blocks": {
 				"column-0": {
 					"type": "column",
 					"settings": {
-						"title": "Free Shipping",
-						"text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
+						"title": "Cold pack",
+						"text": "<p>Insulated packaging and ice packs keep soft rinds and blues at the right temperature in transit.</p>",
 						"link_label": "",
 						"link": ""
 					}
@@ -159,47 +117,55 @@
 				"column-1": {
 					"type": "column",
 					"settings": {
-						"title": "Hassle-Free Exchanges",
-						"text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
+						"title": "Storage",
+						"text": "<p>Wrap in cheese paper or waxed paper, refrigerate, and finish within a few days of opening.</p>",
+						"link_label": "",
+						"link": ""
+					}
+				},
+				"column-2": {
+					"type": "column",
+					"settings": {
+						"title": "Pairing",
+						"text": "<p>Each cut includes a short note — milk, texture, and what to pour or serve beside it.</p>",
 						"link_label": "",
 						"link": ""
 					}
 				}
 			},
-			"block_order": ["column-0", "column-1"],
+			"block_order": ["column-0", "column-1", "column-2"],
 			"settings": {
-				"title": "",
-				"heading_size": "h1",
+				"title": "How we ship cheese",
+				"heading_size": "h2",
 				"image_width": "full",
 				"image_ratio": "adapt",
-				"columns_desktop": 2,
+				"columns_desktop": 3,
 				"column_alignment": "left",
 				"background_style": "none",
 				"button_label": "",
 				"button_link": "",
 				"swipe_on_mobile": false,
-				"color_scheme": "scheme-1",
+				"color_scheme": "scheme-2",
 				"columns_mobile": "1",
-				"padding_top": 36,
+				"padding_top": 48,
 				"padding_bottom": 36
 			}
 		},
 		"related-products": {
-			"type": "related-products",
+			"type": "related-products-slider",
 			"settings": {
 				"heading": "You may also like",
 				"heading_size": "h2",
-				"columns_desktop": 4,
+				"products_to_show": 6,
 				"color_scheme": "scheme-1",
-				"image_ratio": "square",
+				"image_ratio": "portrait",
 				"show_secondary_image": true,
 				"show_vendor": false,
 				"show_rating": false,
-				"columns_mobile": "2",
 				"padding_top": 36,
-				"padding_bottom": 28
+				"padding_bottom": 48
 			}
 		}
 	},
-	"order": ["main", "image-with-text", "multicolumn", "related-products"]
+	"order": ["main", "promises", "related-products"]
 }
