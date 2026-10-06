@@ -1,0 +1,49 @@
+{% comment %}
+	Compact pairing suggestions for the cart drawer (2–3 products from a collection).
+{% endcomment %}
+{%- liquid
+	assign pairing_collection = settings.cart_drawer_collection
+	assign shown = 0
+-%}
+
+{%- if pairing_collection != blank and pairing_collection.products_count > 0 -%}
+	<div class="cart-pairing">
+		<p class="cart-pairing__title">{{ 'sections.cart.pairing_title' | t }}</p>
+		<ul class="cart-pairing__list" role="list">
+			{%- for product in pairing_collection.products limit: 6 -%}
+				{%- if shown >= 3 -%}
+					{%- break -%}
+				{%- endif -%}
+				{%- unless product.available -%}
+					{%- continue -%}
+				{%- endunless -%}
+				{%- assign already_in_cart = false -%}
+				{%- for item in cart.items -%}
+					{%- if item.product_id == product.id -%}
+						{%- assign already_in_cart = true -%}
+						{%- break -%}
+					{%- endif -%}
+				{%- endfor -%}
+				{%- if already_in_cart -%}
+					{%- continue -%}
+				{%- endif -%}
+				<li class="cart-pairing__item">
+					<a href="{{ product.url }}" class="cart-pairing__image-link" aria-hidden="true" tabindex="-1">
+						{%- if product.featured_media -%}
+							{{
+								product.featured_media
+								| image_url: width: 140
+								| image_tag: loading: 'lazy', class: 'cart-pairing__image', widths: '70, 140', sizes: '56px', alt: ''
+							}}
+						{%- endif -%}
+					</a>
+					<div class="cart-pairing__meta">
+						<a href="{{ product.url }}" class="cart-pairing__name">{{ product.title | escape }}</a>
+						<span class="cart-pairing__price">{{ product.price | money }}</span>
+					</div>
+				</li>
+				{%- assign shown = shown | plus: 1 -%}
+			{%- endfor -%}
+		</ul>
+	</div>
+{%- endif -%}

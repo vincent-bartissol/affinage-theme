@@ -170,6 +170,7 @@
       "show_vendor": false,
       "show_cart_note": false,
       "cart_drawer_collection": "featured",
+      "cart_free_shipping_threshold": 60,
       "sections": {
         "main-password-header": {
           "type": "main-password-header",

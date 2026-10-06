@@ -1,0 +1,39 @@
+{% comment %}
+	Free shipping progress for cart drawer and cart page.
+	Threshold uses settings.cart_free_shipping_threshold in major currency units (e.g. 60 for €60).
+{% endcomment %}
+{%- liquid
+	assign threshold_amount = settings.cart_free_shipping_threshold | default: 60 | times: 100
+	assign cart_total = cart.total_price
+	assign remaining = threshold_amount | minus: cart_total
+	if remaining < 0
+		assign remaining = 0
+	endif
+	if threshold_amount > 0
+		assign progress = cart_total | times: 100.0 | divided_by: threshold_amount
+	else
+		assign progress = 100
+	endif
+	if progress > 100
+		assign progress = 100
+	endif
+	assign remaining_money = remaining | money
+-%}
+
+{%- unless cart == empty or threshold_amount <= 0 -%}
+	<div class="cart-shipping-progress" role="status">
+		{%- if remaining == 0 -%}
+			<span class="cart-shipping-progress__label">{{ 'sections.cart.free_shipping_unlocked' | t }}</span>
+			<span class="cart-shipping-progress__track" aria-hidden="true">
+				<span class="cart-shipping-progress__bar" style="width: 100%"></span>
+			</span>
+		{%- else -%}
+			<span class="cart-shipping-progress__label">
+				{{ 'sections.cart.free_shipping_remaining_html' | t: amount: remaining_money }}
+			</span>
+			<span class="cart-shipping-progress__track" aria-hidden="true">
+				<span class="cart-shipping-progress__bar" style="width: {{ progress }}%"></span>
+			</span>
+		{%- endif -%}
+	</div>
+{%- endunless -%}
