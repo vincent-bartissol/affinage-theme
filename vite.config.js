@@ -7,7 +7,7 @@ export default defineConfig({
 		emptyOutDir: false,
 		cssMinify: true,
 		manifest: "manifest.json",
-		rollupOptions: {
+		rolldownOptions: {
 			output: {
 				entryFileNames: "[name].[hash].min.js",
 				chunkFileNames: "[name].[hash].min.js",

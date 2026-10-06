@@ -47,19 +47,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '22' # Use the Node.js version you need
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build with Vite
-        run: npm run vite:build
-
-      - name: Install Shopify CLI
-        run: npm install -g @shopify/cli @shopify/theme
+        run: pnpm vite:build
 
       - name: Set theme name to branch name
         id: set-theme-name
@@ -68,7 +69,7 @@ jobs:
       - name: Check if theme exists
         id: check-theme
         run: |
-          if shopify theme pull --theme ${{ env.THEME_NAME }} --store vincent-store-dev.myshopify.com --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}; then
+          if pnpm exec shopify theme pull --theme ${{ env.THEME_NAME }} --store vincent-store-dev.myshopify.com --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}; then
             echo "Theme exists"
             echo "THEME_EXISTS=true" >> $GITHUB_ENV
           else
@@ -80,11 +81,11 @@ jobs:
       - name: Create new theme if it doesn't exist
         if: env.THEME_EXISTS == 'false'
         run: |
-          shopify theme push --unpublished --theme ${{ env.THEME_NAME }} --store vincent-store-dev.myshopify.com --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+          pnpm exec shopify theme push --unpublished --theme ${{ env.THEME_NAME }} --store vincent-store-dev.myshopify.com --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
 
       - name: Deploy theme to Shopify Development
         run: |
-          shopify theme push \
+          pnpm exec shopify theme push \
             --json \
             --theme ${{ env.THEME_NAME }} \
             --store vincent-store-dev.myshopify.com \
@@ -95,13 +96,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22' # Use the Node.js version you need
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
-      - name: Install Shopify CLI
-        run: npm install -g @shopify/cli @shopify/theme
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Set theme name to branch name
         id: set-theme-name
@@ -109,7 +117,7 @@ jobs:
 
       - name: Delete development theme
         run: |
-          shopify theme delete --theme ${{ env.THEME_NAME }} --store vincent-store-dev.myshopify.com --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }} --force
+          pnpm exec shopify theme delete --theme ${{ env.THEME_NAME }} --store vincent-store-dev.myshopify.com --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }} --force
 
   deploy-staging:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
@@ -119,23 +127,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '22' # Use the Node.js version you need
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build with Vite
-        run: npm run vite:build
-
-      - name: Install Shopify CLI
-        run: npm install -g @shopify/cli @shopify/theme
+        run: pnpm vite:build
 
       - name: Deploy theme to Shopify Staging
         run: |
-          shopify theme push \
+          pnpm exec shopify theme push \
             --json \
             --theme 120929550451 \
             --store vincent-store-dev.myshopify.com \
@@ -150,23 +159,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '22' # Use the Node.js version you need
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install
-  
-      - name: Build with Vite
-        run: npm run vite:build
+        run: pnpm install --frozen-lockfile
 
-      - name: Install Shopify CLI
-        run: npm install -g @shopify/cli @shopify/theme
-      
+      - name: Build with Vite
+        run: pnpm vite:build
+
       - name: Deploy theme to Shopify Production
         run: |
-          shopify theme push --live \
+          pnpm exec shopify theme push --live \
             --json \
             --theme 136285159539 \
             --store vincent-store-dev.myshopify.com \
