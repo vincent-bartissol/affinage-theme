@@ -4,23 +4,145 @@ jobs:
   lhci:
     name: Lighthouse
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Lighthouse
-        uses: shopify/lighthouse-ci-action@v1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          store: ${{ secrets.SHOP_STORE_OS2 }}
-          password: ${{ secrets.SHOP_PASSWORD_OS2 }}
-          access_token: ${{ secrets.SHOP_ACCESS_TOKEN }}
-          collection_handle: all
-          lhci_github_app_token: ${{ secrets.LHCI_GITHUB_TOKEN }}
-          pull_theme: ${{ secrets.SHOP_PULL_THEME }}
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Set up Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          install-dependencies: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build with Vite
+        run: pnpm vite:build
+
+      - name: Resolve storefront URLs
+        id: urls
+        env:
+          SHOP_ACCESS_TOKEN: ${{ secrets.SHOP_ACCESS_TOKEN }}
+          SHOP_STORE: ${{ secrets.SHOP_STORE_OS2 }}
+        run: |
+          store="${SHOP_STORE#https://}"
+          store="${store#http://}"
+          store="${store%%/*}"
+          product_handle="$(curl -sS -f -H "X-Shopify-Access-Token: ${SHOP_ACCESS_TOKEN}" \
+            "https://${store}/admin/api/2026-01/products.json?published_status=published&limit=1" \
+            | jq -r '.products[0].handle')"
+          if [ -z "${product_handle}" ] || [ "${product_handle}" = "null" ]; then
+            echo "No published product found for the product page audit."
+            exit 1
+          fi
+          echo "store=${store}" >> "${GITHUB_OUTPUT}"
+          echo "product_handle=${product_handle}" >> "${GITHUB_OUTPUT}"
+
+      - name: Push preview theme
+        id: theme
+        env:
+          SHOPIFY_FLAG_STORE: ${{ steps.urls.outputs.store }}
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+          CI: '1'
+        run: |
+          pnpm exec shopify theme push --unpublished --json --theme "lhci-${GITHUB_RUN_ID}" > theme-push.json
+          theme_id="$(jq -r '.theme.id // .id' theme-push.json)"
+          if [ -z "${theme_id}" ] || [ "${theme_id}" = "null" ]; then
+            echo "Theme push did not return a theme id."
+            cat theme-push.json
+            exit 1
+          fi
+          echo "theme_id=${theme_id}" >> "${GITHUB_OUTPUT}"
+
+      - name: Run Lighthouse
+        env:
+          SHOP_HOST: https://${{ steps.urls.outputs.store }}
+          SHOP_PASSWORD: ${{ secrets.SHOP_PASSWORD_OS2 }}
+          PREVIEW_QUERY: ?preview_theme_id=${{ steps.theme.outputs.theme_id }}&_fd=0&pb=0
+          PREVIEW_URL: https://${{ steps.urls.outputs.store }}/?preview_theme_id=${{ steps.theme.outputs.theme_id }}&_fd=0&pb=0
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          PRODUCT_HANDLE: ${{ steps.urls.outputs.product_handle }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const host = process.env.SHOP_HOST;
+          const query = process.env.PREVIEW_QUERY;
+          const product = process.env.PRODUCT_HANDLE;
+          const config = {
+            ci: {
+              collect: {
+                numberOfRuns: 1,
+                url: [
+                  `${host}/${query}`,
+                  `${host}/products/${product}${query}`,
+                  `${host}/collections/all${query}`,
+                  `${host}/cart${query}`,
+                ],
+                puppeteerScript: '.github/lighthouse/set-preview-cookies.js',
+                puppeteerLaunchOptions: {
+                  executablePath: process.env.CHROME_PATH,
+                  args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                  ],
+                },
+                settings: {
+                  chromeFlags: '--no-sandbox --disable-dev-shm-usage',
+                },
+              },
+              upload: { target: 'temporary-public-storage' },
+              assert: {
+                assertions: {
+                  'categories:performance': ['error', { minScore: 0.6 }],
+                  'categories:accessibility': ['error', { minScore: 0.9 }],
+                },
+              },
+            },
+          };
+          fs.writeFileSync('lighthouserc.json', JSON.stringify(config, null, 2));
+          NODE
+          pnpm dlx @lhci/cli@0.15.1 autorun --config=./lighthouserc.json
+
+      - name: Delete preview theme
+        if: always() && steps.theme.outputs.theme_id != ''
+        env:
+          SHOPIFY_FLAG_STORE: ${{ steps.urls.outputs.store }}
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+          CI: '1'
+        run: pnpm exec shopify theme delete --theme "${{ steps.theme.outputs.theme_id }}" --force
   theme-check:
     name: Theme Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Theme Check
-        uses: shopify/theme-check-action@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          token: ${{ github.token }}
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build with Vite
+        run: pnpm vite:build
+
+      - name: Theme Check
+        run: pnpm exec shopify theme check

@@ -66,7 +66,7 @@ Frontend entrypoints live in `frontend/entrypoints/` and are injected through th
 
 [`.github/workflows/CICD.yml`](.github/workflows/CICD.yml) installs with pnpm, runs `pnpm vite:build`, then deploys with `pnpm exec shopify theme push`.
 
-Theme Check and Lighthouse helpers from Dawn remain available in [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs Theme Check and Lighthouse. Lighthouse builds the theme, pushes a temporary preview, and audits the homepage, a product page, the `all` collection, and the cart.
 
 ## AI agents
 
