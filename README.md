@@ -1,43 +1,73 @@
-# Requires
-- Node v24 (see `.nvmrc`)
-- pnpm 10 (pinned via `packageManager` in `package.json`)
-- Shopify CLI https://shopify.dev/docs/api/shopify-cli/theme
-- Vite - vite-plugin-shopify https://www.npmjs.com/package/vite-plugin-shopify
+# vincent-store-dev
 
-# Launch commands
+Shopify Online Store theme based on Dawn, with a Vite + Tailwind CSS frontend toolchain.
+
+Dev store: `vincent-store-dev.myshopify.com`
+
+## Requirements
+
+- Node.js **24** (see [`.nvmrc`](.nvmrc); engines require `>=22.12.0`)
+- [pnpm](https://pnpm.io) **10** (pinned via `packageManager` in [`package.json`](package.json))
+- [Shopify CLI](https://shopify.dev/docs/api/shopify-cli/theme) (installed as a project dependency)
+
+Enable Corepack once so the pinned pnpm version is used:
+
+```sh
+corepack enable
+```
+
+## Setup
+
 ```sh
 pnpm install
-pnpm dev # Launch Vite + Shopify server
+pnpm dev
 ```
 
-## Dev Dependency
-- Prettier : installed but not add to main command
-  -- dev : "dev": "run-p \"shopify:dev\" \"vite\" \"prettier:watch\"",
-  -- pnpm prettier ./layout/*
+`pnpm dev` runs three processes in parallel:
 
-- Tailwind : to check installation
+1. `shopify theme dev` against the development store
+2. Vite (HMR for JS/SCSS)
+3. Prettier watch on Liquid and frontend sources
 
+### Useful scripts
 
-### Theme Check
+| Script | Purpose |
+| --- | --- |
+| `pnpm dev` | Theme preview + Vite + Prettier watch |
+| `pnpm vite:build` | Production build of frontend assets into `assets/` |
+| `pnpm shopify:deploy` | Push the theme to the development store |
+| `pnpm exec shopify theme check` | Lint the theme |
+| `pnpm prettier ./layout` | Format specific paths |
 
-We recommend using [Theme Check](https://github.com/shopify/theme-check) as a way to validate and lint your Shopify themes.
+Built Vite outputs (`assets/theme.*.min.js`, `assets/theme.*.min.css`, `assets/manifest.json`, `snippets/vite-tag.liquid`) are generated and gitignored. Always run `pnpm vite:build` before deploying from CI or a clean checkout.
 
-We've added Theme Check to Dawn's [list of VS Code extensions](/.vscode/extensions.json) so if you're using Visual Studio Code as your code editor of choice, you'll be prompted to install the [Theme Check VS Code](https://marketplace.visualstudio.com/items?itemName=Shopify.theme-check-vscode) extension upon opening VS Code after you've forked and cloned Dawn.
+## Project layout
 
-You can also run it from a terminal with the following Shopify CLI command:
+| Path | Role |
+| --- | --- |
+| `layout/`, `sections/`, `snippets/`, `templates/` | Shopify Liquid theme |
+| `config/` | Theme settings schema and data |
+| `locales/` | Translations |
+| `frontend/` | Vite source (entrypoints + components) |
+| `assets/` | Theme static assets + Vite build output |
+| `vite.config.js` | Vite + `vite-plugin-shopify` + Tailwind |
 
-```bash
-pnpm exec shopify theme check
-```
+Frontend entrypoints live in `frontend/entrypoints/` and are injected through the `vite-tag` snippet in `layout/theme.liquid`.
 
-### Continuous Integration
+## Tooling
 
-Dawn uses [GitHub Actions](https://github.com/features/actions) to maintain the quality of the theme. [This is a starting point](https://github.com/Shopify/dawn/blob/main/.github/workflows/ci.yml) and what we suggest to use in order to ensure you're building better themes. Feel free to build off of it!
+- **Vite 8** with [`vite-plugin-shopify`](https://www.npmjs.com/package/vite-plugin-shopify)
+- **Tailwind CSS 4** via `@tailwindcss/vite`
+- **Sass** (`sass-embedded`) for `frontend/**/*.scss`
+- **Swiper** for the product slider section
+- **Prettier** with `@shopify/prettier-plugin-liquid`
 
-#### Shopify/lighthouse-ci-action
+## Continuous Integration
 
-We love fast websites! Which is why we created [Shopify/lighthouse-ci-action](https://github.com/Shopify/lighthouse-ci-action). This runs a series of [Google Lighthouse](https://developers.google.com/web/tools/lighthouse) audits for the home, product and collections pages on a store to ensure code that gets added doesn't degrade storefront performance over time.
+[`.github/workflows/CICD.yml`](.github/workflows/CICD.yml) installs with pnpm, runs `pnpm vite:build`, then deploys with `pnpm exec shopify theme push`.
 
-#### Shopify/theme-check-action
+Theme Check and Lighthouse helpers from Dawn remain available in [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
-Dawn runs [Theme Check](#Theme-Check) on every commit via [Shopify/theme-check-action](https://github.com/Shopify/theme-check-action).
+## AI agents
+
+See [`AGENTS.md`](AGENTS.md) and [`.cursor/rules/`](.cursor/rules/) for conventions Cursor and other coding agents should follow in this repo.

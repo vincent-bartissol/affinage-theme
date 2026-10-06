@@ -1,0 +1,15 @@
+---
+description: Liquid and Online Store 2.0 conventions for theme files
+globs: layout/**/*,sections/**/*,snippets/**/*,templates/**/*,config/**/*,locales/**/*
+alwaysApply: false
+---
+
+# Liquid / theme files
+
+- Prefer `{% render 'snippet' %}` over `{% include %}`.
+- Keep section schemas valid JSON inside `{% schema %}…{% endschema %}`.
+- Reuse Dawn snippets (`card-product`, etc.) before duplicating markup.
+- For new JS-heavy UI, wire a Vite web component from `frontend/` instead of large inline scripts.
+- Load Vite assets only through the existing `vite-tag` renders in `layout/theme.liquid`.
+- Add merchant-facing strings to `locales/` (at least `en.default.json` / schema locales when editing settings labels).
+- Run Theme Check mentally: no undefined objects, unused variables, or deprecated filters in new code.

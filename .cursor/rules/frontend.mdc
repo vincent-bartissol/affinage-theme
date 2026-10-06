@@ -1,0 +1,15 @@
+---
+description: Vite, Tailwind, and frontend component conventions
+globs: frontend/**/*,vite.config.js
+alwaysApply: false
+---
+
+# Frontend (Vite)
+
+- Entrypoints live in `frontend/entrypoints/` (`theme.js`, `theme.scss`).
+- New components go in `frontend/components/` and are imported from the entrypoints.
+- Prefer custom elements / small modules (see `Slider.js`) over global scripts.
+- Style with Tailwind v4 (`@use "tailwindcss"`) and component SCSS as needed.
+- Keep `vite.config.js` output names as `*.min.js` / `*.min[extname]` so `.gitignore` patterns stay valid.
+- After substantive frontend edits, verify with `pnpm vite:build`.
+- Do not hand-edit generated `assets/theme.*.min.*` or `assets/manifest.json`.

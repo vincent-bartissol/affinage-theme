@@ -1,0 +1,14 @@
+---
+description: Core project conventions for the Shopify theme + Vite toolchain
+alwaysApply: true
+---
+
+# vincent-store-dev — always apply
+
+- This is a Shopify theme (Liquid + OS 2.0), not a Hydrogen/Remix app.
+- Use **pnpm** only. Do not recreate `package-lock.json`.
+- Run Shopify CLI as `pnpm exec shopify …` (local `@shopify/cli`).
+- Frontend source of truth is `frontend/`; hashed Vite outputs in `assets/` and `snippets/vite-tag.liquid` are generated and gitignored.
+- Keep changes scoped. Do not rewrite Dawn sections unless the task requires it.
+- Conventional commits; work on a feature branch, not `main`.
+- Never commit store tokens, passwords, or real credentials from `shopify.theme.toml`.
