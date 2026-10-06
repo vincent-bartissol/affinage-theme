@@ -31,7 +31,7 @@
 			},
 			"block_order": ["heading", "text", "button"],
 			"settings": {
-				"image_overlay_opacity": 48,
+				"image_overlay_opacity": 50,
 				"image_height": "large",
 				"desktop_content_position": "middle-center",
 				"show_text_box": false,
@@ -213,12 +213,6 @@
 				"padding_top": 56,
 				"padding_bottom": 56
 			}
-		},
-		"api_graphql": {
-			"type": "api-graphql"
-		},
-		"form_customer_info": {
-			"type": "form-customer-info"
 		}
 	},
 	"order": [
