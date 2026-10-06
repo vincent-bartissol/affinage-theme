@@ -1,3 +1,9 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'quick-add.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+
 <div class="slider-products-section page-width color-{{ section.settings.color_scheme }}">
 	{% if section.settings.title != blank %}
 		<h2 class="slider-products__heading {{ section.settings.heading_size }}">
@@ -32,7 +38,9 @@
 						{% render 'card-product',
 							card_product: product,
 							media_aspect_ratio: 'portrait',
-							show_secondary_image: true
+							show_secondary_image: true,
+							quick_add: 'standard',
+							section_id: section.id
 						%}
 					</div>
 				{% endfor %}
@@ -44,7 +52,9 @@
 						{% render 'card-product',
 							card_product: block.settings.product,
 							media_aspect_ratio: 'portrait',
-							show_secondary_image: true
+							show_secondary_image: true,
+							quick_add: 'standard',
+							section_id: section.id
 						%}
 					</div>
 				{% endif %}
