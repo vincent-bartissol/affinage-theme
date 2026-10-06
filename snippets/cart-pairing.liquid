@@ -1,49 +1,52 @@
 {% comment %}
-	Compact pairing suggestions for the cart drawer (2–3 products from a collection).
+	Cart drawer pairings via Shopify product recommendations.
+	Uses complementary products (Search & Discovery); falls back to related
+	recommendations when complementary returns nothing.
 {% endcomment %}
 {%- liquid
-	assign pairing_collection = settings.cart_drawer_collection
-	assign shown = 0
+	assign seed_product = null
+	assign gift_product = settings.cart_free_gift_product
+
+	for item in cart.items
+		assign is_reward = false
+		if gift_product != blank and item.product.id == gift_product.id
+			assign is_reward = true
+		endif
+		if item.product.tags contains 'free-sample' or item.properties._sample == 'true'
+			assign is_reward = true
+		endif
+		if item.product.tags contains 'free-gift' or item.properties._gift == 'true'
+			assign is_reward = true
+		endif
+		unless is_reward
+			assign seed_product = item.product
+		endunless
+	endfor
 -%}
 
-{%- if pairing_collection != blank and pairing_collection.products_count > 0 -%}
-	<div class="cart-pairing">
-		<p class="cart-pairing__title">{{ 'sections.cart.pairing_title' | t }}</p>
-		<ul class="cart-pairing__list" role="list">
-			{%- for product in pairing_collection.products limit: 6 -%}
-				{%- if shown >= 3 -%}
-					{%- break -%}
-				{%- endif -%}
-				{%- unless product.available -%}
-					{%- continue -%}
-				{%- endunless -%}
-				{%- assign already_in_cart = false -%}
-				{%- for item in cart.items -%}
-					{%- if item.product_id == product.id -%}
-						{%- assign already_in_cart = true -%}
-						{%- break -%}
-					{%- endif -%}
+{%- if seed_product != blank -%}
+	<product-recommendations
+		class="cart-pairing-recommendations"
+		data-url="{{ routes.product_recommendations_url }}?section_id=cart-pairing-recommendations&limit=4&intent=complementary"
+		data-section-id="cart-pairing-recommendations"
+		data-product-id="{{ seed_product.id }}"
+		data-fallback-intent="related"
+		data-eager="true"
+		data-hide-when-empty="true"
+	>
+		<div class="cart-pairing cart-pairing--pending" aria-busy="true">
+			<p class="cart-pairing__title">{{ 'sections.cart.pairing_title' | t }}</p>
+			<ul class="cart-pairing__list" role="list">
+				{%- for i in (1..3) -%}
+					<li class="cart-pairing__item cart-pairing__item--skeleton" aria-hidden="true">
+						<span class="cart-pairing__media"></span>
+						<span class="cart-pairing__meta">
+							<span class="cart-pairing__skeleton-line"></span>
+							<span class="cart-pairing__skeleton-line cart-pairing__skeleton-line--short"></span>
+						</span>
+					</li>
 				{%- endfor -%}
-				{%- if already_in_cart -%}
-					{%- continue -%}
-				{%- endif -%}
-				<li class="cart-pairing__item">
-					<a href="{{ product.url }}" class="cart-pairing__image-link" aria-hidden="true" tabindex="-1">
-						{%- if product.featured_media -%}
-							{{
-								product.featured_media
-								| image_url: width: 140
-								| image_tag: loading: 'lazy', class: 'cart-pairing__image', widths: '70, 140', sizes: '56px', alt: ''
-							}}
-						{%- endif -%}
-					</a>
-					<div class="cart-pairing__meta">
-						<a href="{{ product.url }}" class="cart-pairing__name">{{ product.title | escape }}</a>
-						<span class="cart-pairing__price">{{ product.price | money }}</span>
-					</div>
-				</li>
-				{%- assign shown = shown | plus: 1 -%}
-			{%- endfor -%}
-		</ul>
-	</div>
+			</ul>
+		</div>
+	</product-recommendations>
 {%- endif -%}

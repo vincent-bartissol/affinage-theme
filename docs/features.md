@@ -75,7 +75,7 @@ Gift product pages use the `free-gift` tag and redirect home. Keep a real catalo
 ## Free shipping progress and pairing
 
 - Progress bar: [`snippets/cart-shipping-progress.liquid`](../snippets/cart-shipping-progress.liquid)
-- Pairing suggestions in the drawer: [`snippets/cart-pairing.liquid`](../snippets/cart-pairing.liquid) (uses `cart_drawer_collection`)
+- Pairing suggestions in the drawer: [`snippets/cart-pairing.liquid`](../snippets/cart-pairing.liquid) + [`sections/cart-pairing-recommendations.liquid`](../sections/cart-pairing-recommendations.liquid) — Shopify complementary recommendations (Search & Discovery), with related-product fallback; panel sits beside the drawer on large screens
 
 ## Announcement bar
 
