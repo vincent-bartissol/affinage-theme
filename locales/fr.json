@@ -313,7 +313,15 @@
       "duties_included_taxes_at_checkout_shipping_at_checkout_with_policy_html": "Frais de douane inclus. Taxes, réductions et <a href=\"{{ link }}\">frais d’expédition</a> calculés à l’étape du paiement.",
       "duties_included_taxes_at_checkout_shipping_at_checkout_without_policy": "Frais de douane inclus. Taxes, réductions et frais d’expédition calculés à l’étape du paiement.",
       "taxes_at_checkout_shipping_at_checkout_with_policy_html": "Taxes, réductions et <a href=\"{{ link }}\">frais d’expédition</a> calculés à l’étape du paiement.",
-      "taxes_at_checkout_shipping_at_checkout_without_policy": "Taxes, réductions et frais d’expédition calculés à l’étape du paiement."
+      "taxes_at_checkout_shipping_at_checkout_without_policy": "Taxes, réductions et frais d’expédition calculés à l’étape du paiement.",
+      "free_shipping_unlocked": "Livraison froide offerte débloquée.",
+      "free_shipping_remaining_html": "Plus que {{ amount }} pour la livraison froide offerte.",
+      "free_shipping_unlocked_gift_remaining_html": "Livraison froide offerte débloquée. Plus que {{ amount }} pour le cadeau.",
+      "free_gift_remaining_html": "Plus que {{ amount }} pour le cadeau offert.",
+      "free_gift_unlocked": "Cadeau offert débloqué.",
+      "rewards_unlocked": "Livraison froide offerte et cadeau débloqués.",
+      "free_gift_badge": "Cadeau offert",
+      "free_gift_add_again": "Ajouter à nouveau le cadeau"
     },
     "footer": {
       "payment": "Moyens de paiement"
@@ -358,7 +366,11 @@
       "announcement_bar": "Barre d’annonces",
       "free_shipping_from_html": "Livraison offerte dès {{ amount }}",
       "free_shipping_remaining_html": "Plus que {{ amount }} pour la livraison offerte",
-      "free_shipping_unlocked": "Livraison offerte débloquée"
+      "free_shipping_unlocked": "Livraison offerte débloquée",
+      "free_gift_from_html": "Cadeau offert dès {{ amount }}",
+      "free_gift_remaining_html": "Plus que {{ amount }} pour le cadeau offert",
+      "free_gift_unlocked": "Cadeau offert débloqué",
+      "rewards_unlocked": "Livraison et cadeau offerts débloqués"
     },
     "quick_order_list": {
       "product_total": "Sous-total des produits",

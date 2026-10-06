@@ -336,6 +336,20 @@
             "label": "Collection",
             "info": "Shown when cart drawer is empty"
           }
+        },
+        "cart_free_gift": {
+          "header": "Free gift",
+          "enabled": {
+            "label": "Enable free gift"
+          },
+          "product": {
+            "label": "Gift product",
+            "info": "Automatically added when the cart reaches the threshold. Pair with an automatic Buy X Get Y discount for €0."
+          },
+          "threshold": {
+            "label": "Free gift threshold",
+            "info": "Amount in shop currency (e.g. 80 for €80). Set to 0 to disable."
+          }
         }
       }
     },

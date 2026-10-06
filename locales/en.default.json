@@ -273,7 +273,11 @@
       "announcement_bar": "Announcement bar",
       "free_shipping_from_html": "Free shipping from {{ amount }}",
       "free_shipping_remaining_html": "Only {{ amount }} away from free shipping",
-      "free_shipping_unlocked": "Free shipping unlocked"
+      "free_shipping_unlocked": "Free shipping unlocked",
+      "free_gift_from_html": "Free gift from {{ amount }}",
+      "free_gift_remaining_html": "Only {{ amount }} away from your free gift",
+      "free_gift_unlocked": "Free gift unlocked",
+      "rewards_unlocked": "Free shipping and free gift unlocked"
     },
 
     "header": {
@@ -317,7 +321,13 @@
       },
       "free_shipping_unlocked": "You’ve unlocked free cold shipping.",
       "free_shipping_remaining_html": "Add {{ amount }} more for free cold shipping.",
-      "pairing_title": "Add a pairing"
+      "free_shipping_unlocked_gift_remaining_html": "Free cold shipping unlocked. Add {{ amount }} more for your free gift.",
+      "free_gift_remaining_html": "Add {{ amount }} more for your free gift.",
+      "free_gift_unlocked": "You’ve unlocked your free gift.",
+      "rewards_unlocked": "Free cold shipping and your free gift are unlocked.",
+      "pairing_title": "Add a pairing",
+      "free_gift_badge": "Free gift",
+      "free_gift_add_again": "Add free gift again"
     },
     "footer": {
       "payment": "Payment methods"

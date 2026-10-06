@@ -79,11 +79,22 @@
 
 							<tbody>
 								{%- for item in cart.items -%}
-									<tr class="cart-item" id="CartItem-{{ item.index | plus: 1 }}">
+									{%- liquid
+										assign is_free_gift = false
+										if settings.cart_free_gift_enabled and settings.cart_free_gift_product != blank and item.product.id == settings.cart_free_gift_product.id
+											assign is_free_gift = true
+										endif
+									-%}
+									<tr
+										class="cart-item{% if is_free_gift %} cart-item--free-gift{% endif %}"
+										id="CartItem-{{ item.index | plus: 1 }}"
+									>
 										<td class="cart-item__media">
 											{% if item.image %}
 												{% comment %} Leave empty space due to a:empty CSS display: none rule {% endcomment %}
-												<a href="{{ item.url }}" class="cart-item__link" aria-hidden="true" tabindex="-1"></a>
+												{%- unless is_free_gift -%}
+													<a href="{{ item.url }}" class="cart-item__link" aria-hidden="true" tabindex="-1"></a>
+												{%- endunless -%}
 												<div class="cart-item__image-container gradient global-media-settings">
 													<img
 														src="{{ item.image | image_url: width: 300 }}"
@@ -102,7 +113,14 @@
 												<p class="caption-with-letter-spacing">{{ item.product.vendor }}</p>
 											{%- endif -%}
 
-											<a href="{{ item.url }}" class="cart-item__name h4 break">{{ item.product.title | escape }}</a>
+											{%- if is_free_gift -%}
+												<p class="cart-item__free-gift-badge caption-with-letter-spacing">
+													{{ 'sections.cart.free_gift_badge' | t }}
+												</p>
+												<span class="cart-item__name h4 break">{{ item.product.title | escape }}</span>
+											{%- else -%}
+												<a href="{{ item.url }}" class="cart-item__name h4 break">{{ item.product.title | escape }}</a>
+											{%- endif -%}
 
 											{%- if item.original_price != item.final_price -%}
 												<div class="cart-item__discounted-prices">
@@ -231,56 +249,80 @@
 														{{ 'products.product.quantity.label' | t }}
 													</label>
 													<div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
-														{%- if has_qty_rules or has_vol_pricing -%}
-															<button
-																type="button"
-																aria-expanded="false"
-																class="quantity-popover__info-button quantity-popover__info-button--icon-only button button--tertiary small-hide medium-hide"
-															>
-																{{- 'icon-info.svg' | inline_asset_content -}}
-															</button>
-														{%- endif -%}
-														<quantity-input class="quantity cart-quantity">
-															<button class="quantity__button" name="minus" type="button">
-																<span class="visually-hidden">
-																	{{- 'products.product.quantity.decrease' | t: product: item.product.title | escape -}}
-																</span>
-																<span class="svg-wrapper">
-																	{{- 'icon-minus.svg' | inline_asset_content -}}
-																</span>
-															</button>
+														{%- unless is_free_gift -%}
+															{%- if has_qty_rules or has_vol_pricing -%}
+																<button
+																	type="button"
+																	aria-expanded="false"
+																	class="quantity-popover__info-button quantity-popover__info-button--icon-only button button--tertiary small-hide medium-hide"
+																>
+																	{{- 'icon-info.svg' | inline_asset_content -}}
+																</button>
+															{%- endif -%}
+															<quantity-input class="quantity cart-quantity">
+																<button class="quantity__button" name="minus" type="button">
+																	<span class="visually-hidden">
+																		{{-
+																			'products.product.quantity.decrease'
+																			| t: product: item.product.title
+																			| escape
+																		-}}
+																	</span>
+																	<span class="svg-wrapper">
+																		{{- 'icon-minus.svg' | inline_asset_content -}}
+																	</span>
+																</button>
+																<input
+																	class="quantity__input"
+																	data-quantity-variant-id="{{ item.variant.id }}"
+																	type="number"
+																	name="updates[]"
+																	value="{{ item.quantity }}"
+																	{% # theme-check-disable %}
+																	data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+																	min="0"
+																	data-min="{{ item.variant.quantity_rule.min }}"
+																	{% if item.variant.quantity_rule.max != null %}
+																		max="{{ item.variant.quantity_rule.max }}"
+																	{% endif %}
+																	step="{{ item.variant.quantity_rule.increment }}"
+																	{% # theme-check-enable %}
+																	aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+																	id="Quantity-{{ item.index | plus: 1 }}"
+																	data-index="{{ item.index | plus: 1 }}"
+																>
+																<button class="quantity__button" name="plus" type="button">
+																	<span class="visually-hidden">
+																		{{-
+																			'products.product.quantity.increase'
+																			| t: product: item.product.title
+																			| escape
+																		-}}
+																	</span>
+																	<span class="svg-wrapper">
+																		{{- 'icon-plus.svg' | inline_asset_content -}}
+																	</span>
+																</button>
+															</quantity-input>
+														{%- else -%}
+															<span class="cart-item__free-gift-qty" aria-hidden="true">1</span>
 															<input
-																class="quantity__input"
+																class="quantity__input visually-hidden"
 																data-quantity-variant-id="{{ item.variant.id }}"
-																type="number"
+																type="hidden"
 																name="updates[]"
-																value="{{ item.quantity }}"
-																{% # theme-check-disable %}
-																data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
-																min="0"
-																data-min="{{ item.variant.quantity_rule.min }}"
-																{% if item.variant.quantity_rule.max != null %}
-																	max="{{ item.variant.quantity_rule.max }}"
-																{% endif %}
-																step="{{ item.variant.quantity_rule.increment }}"
-																{% # theme-check-enable %}
-																aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+																value="1"
 																id="Quantity-{{ item.index | plus: 1 }}"
 																data-index="{{ item.index | plus: 1 }}"
 															>
-															<button class="quantity__button" name="plus" type="button">
-																<span class="visually-hidden">
-																	{{- 'products.product.quantity.increase' | t: product: item.product.title | escape -}}
-																</span>
-																<span class="svg-wrapper">
-																	{{- 'icon-plus.svg' | inline_asset_content -}}
-																</span>
-															</button>
-														</quantity-input>
+														{%- endunless -%}
 													</div>
 													<cart-remove-button
 														id="Remove-{{ item.index | plus: 1 }}"
 														data-index="{{ item.index | plus: 1 }}"
+														{% if is_free_gift %}
+															data-free-gift
+														{% endif %}
 													>
 														<a
 															href="{{ item.url_to_remove }}"

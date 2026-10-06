@@ -196,6 +196,22 @@ cart-items {
   text-align: center;
 }
 
+.cart-item__free-gift-badge {
+  margin: 0 0 0.4rem;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+.cart-item__free-gift-qty {
+  display: inline-flex;
+  align-items: center;
+  min-height: 4.5rem;
+  padding: 0 1rem;
+}
+
+.cart-free-gift {
+  margin: 1.5rem 0;
+}
+
 @media screen and (min-width: 750px) {
   .cart-note {
     max-width: 35rem;

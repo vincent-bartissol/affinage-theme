@@ -4,9 +4,29 @@ class CartRemoveButton extends HTMLElement {
 
     this.addEventListener('click', (event) => {
       event.preventDefault();
-      const cartItems = this.closest('cart-items') || this.closest('cart-drawer-items');
-      cartItems.updateQuantity(this.dataset.index, 0, event);
+      this.onRemove(event);
     });
+  }
+
+  async onRemove(event) {
+    const cartItems = this.closest('cart-items') || this.closest('cart-drawer-items');
+
+    if (this.hasAttribute('data-free-gift')) {
+      try {
+        await fetch(`${routes.cart_update_url}`, {
+          ...fetchConfig(),
+          ...{
+            body: JSON.stringify({
+              attributes: { free_gift_declined: 'true' },
+            }),
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    cartItems.updateQuantity(this.dataset.index, 0, event);
   }
 }
 
@@ -106,12 +126,29 @@ class CartItems extends HTMLElement {
           console.error(e);
         });
     } else {
-      return fetch(`${routes.cart_url}?section_id=main-cart-items`)
-        .then((response) => response.text())
-        .then((responseText) => {
-          const html = new DOMParser().parseFromString(responseText, 'text/html');
-          const sourceQty = html.querySelector('cart-items');
-          this.innerHTML = sourceQty.innerHTML;
+      const footer = document.getElementById('main-cart-footer');
+      const sections = ['main-cart-items'];
+      if (footer?.dataset.id) sections.push(footer.dataset.id);
+
+      return fetch(`${routes.cart_url}?sections=${sections.join(',')}`)
+        .then((response) => response.json())
+        .then((parsedState) => {
+          const itemsHtml = parsedState[sections[0]];
+          if (itemsHtml) {
+            const html = new DOMParser().parseFromString(itemsHtml, 'text/html');
+            const sourceQty = html.querySelector('cart-items');
+            if (sourceQty) this.innerHTML = sourceQty.innerHTML;
+          }
+
+          if (footer?.dataset.id && parsedState[footer.dataset.id]) {
+            const footerHtml = new DOMParser().parseFromString(
+              parsedState[footer.dataset.id],
+              'text/html'
+            );
+            const sourceFooter = footerHtml.querySelector('.js-contents');
+            const targetFooter = footer.querySelector('.js-contents');
+            if (sourceFooter && targetFooter) targetFooter.innerHTML = sourceFooter.innerHTML;
+          }
         })
         .catch((e) => {
           console.error(e);
