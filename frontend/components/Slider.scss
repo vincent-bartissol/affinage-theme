@@ -1,34 +1,128 @@
-.swiper {
-	// width: 600px;
-	height: 300px;
+.slider-products {
+	position: relative;
+	padding-inline: 1.5rem;
+	margin-block: 1rem 2.5rem;
 
-	.swiper-pagination {
-		display: block;
+	@media screen and (min-width: 750px) {
+		padding-inline: 2rem;
+	}
+
+	&__heading {
+		text-align: center;
+		margin-bottom: 0.5rem;
+	}
+
+	&__description {
+		text-align: center;
+		max-width: 36rem;
+		margin: 0 auto 1.5rem;
+		opacity: 0.85;
+	}
+
+	.swiper-wrapper {
+		align-items: stretch;
+	}
+
+	.swiper-slide {
+		height: auto;
 	}
 
 	.swiper-button-prev,
 	.swiper-button-next {
-		display: block;
-		width: 40px;
-		height: 40px;
-		&:hover {
-			&::after {
-				transform: translate(-50%, -50%) scale(1.1);
-				transition: transform 0.3s ease;
-			}
-		}
+		width: 2.75rem;
+		height: 2.75rem;
+		color: rgb(var(--color-foreground));
+		background: rgb(var(--color-background));
+		border: 1px solid rgba(var(--color-foreground), 0.2);
+		border-radius: 0;
+		margin-top: 0;
+		top: 40%;
+		transform: translateY(-50%);
+
 		&::after {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
+			font-size: 0.85rem;
+			font-weight: 700;
+		}
+
+		&:hover {
+			border-color: rgba(var(--color-foreground), 0.55);
+		}
+
+		&.swiper-button-disabled {
+			opacity: 0.35;
+		}
+	}
+
+	.swiper-button-prev {
+		left: 0.25rem;
+	}
+
+	.swiper-button-next {
+		right: 0.25rem;
+	}
+
+	.swiper-pagination {
+		bottom: 0;
+		position: relative;
+		margin-top: 1.25rem;
+
+		.swiper-pagination-bullet {
+			background: rgb(var(--color-foreground));
+			opacity: 0.25;
+		}
+
+		.swiper-pagination-bullet-active {
+			opacity: 1;
 		}
 	}
 
 	.swiper-scrollbar {
+		margin-top: 1rem;
+		background: rgba(var(--color-foreground), 0.08);
+
+		.swiper-scrollbar-drag {
+			background: rgba(var(--color-foreground), 0.45);
+		}
+	}
+}
+
+/* Fill Dawn banner__media; text stays in banner__content */
+.banner__media .hero-background-slider {
+	display: block;
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	overflow: hidden;
+
+	.swiper-wrapper,
+	.swiper-slide {
+		height: 100%;
+		width: 100%;
+	}
+
+	.swiper-slide img,
+	.swiper-slide .placeholder-svg {
 		display: block;
-		* {
-			display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		max-width: none;
+	}
+
+	&__pagination {
+		bottom: 1.25rem !important;
+		z-index: 2;
+
+		.swiper-pagination-bullet {
+			background: #f7f3ec;
+			opacity: 0.45;
+		}
+
+		.swiper-pagination-bullet-active {
+			opacity: 1;
 		}
 	}
 }

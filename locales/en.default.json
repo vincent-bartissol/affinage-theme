@@ -311,7 +311,10 @@
       "login": {
         "title": "Have an account?",
         "paragraph_html": "<a href=\"{{ link }}\" class=\"link underlined-link\">Log in</a> to check out faster."
-      }
+      },
+      "free_shipping_unlocked": "You’ve unlocked free cold shipping.",
+      "free_shipping_remaining_html": "Add {{ amount }} more for free cold shipping.",
+      "pairing_title": "Add a pairing"
     },
     "footer": {
       "payment": "Payment methods"

@@ -1,0 +1,266 @@
+{{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+	#Banner-{{ section.id }}::after {
+	  opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+	}
+{%- endstyle -%}
+
+<div
+	id="Banner-{{ section.id }}"
+	class="banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--content-align-mobile-{{ section.settings.mobile_content_alignment }} banner--{{ section.settings.image_height }}{% if section.settings.show_text_below %} banner--mobile-bottom{% endif %}{% if section.settings.show_text_box == false %} banner--desktop-transparent{% endif %}"
+>
+	<div class="banner__media media">
+		{%- if section.blocks.size > 0 -%}
+			<hero-background-slider
+				class="hero-background-slider swiper"
+				data-params='
+					{
+						"slidesPerView": 1,
+						"spaceBetween": 0,
+						"loop": {% if section.blocks.size > 1 %}true{% else %}false{% endif %},
+						"effect": "fade",
+						"fadeEffect": { "crossFade": true },
+						"autoplay": { "delay": {{ section.settings.autoplay_delay | default: 5000 }}, "disableOnInteraction": false },
+						"speed": 900
+					}
+				'
+				data-pagination="{{ section.settings.show_pagination }}"
+				data-navigation="false"
+				data-scrollbar="false"
+			>
+				<div class="swiper-wrapper">
+					{%- for block in section.blocks -%}
+						<div class="hero-background-slider__slide swiper-slide media" {{ block.shopify_attributes }}>
+							{%- if block.settings.image != blank -%}
+								{%- liquid
+									assign img_loading = 'lazy'
+									assign img_fetchpriority = 'auto'
+									if forloop.first
+										assign img_loading = 'eager'
+										assign img_fetchpriority = 'high'
+									endif
+									assign img_alt = block.settings.image.alt | default: section.settings.heading
+								-%}
+								{{
+									block.settings.image
+									| image_url: width: 3840
+									| image_tag:
+										loading: img_loading,
+										fetchpriority: img_fetchpriority,
+										sizes: '100vw',
+										widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+										alt: img_alt
+								}}
+							{%- else -%}
+								{{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+							{%- endif -%}
+						</div>
+					{%- endfor -%}
+				</div>
+				{%- if section.settings.show_pagination and section.blocks.size > 1 -%}
+					<div class="swiper-pagination hero-background-slider__pagination"></div>
+				{%- endif -%}
+			</hero-background-slider>
+		{%- else -%}
+			{{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+		{%- endif -%}
+	</div>
+
+	<div class="banner__content banner__content--{{ section.settings.desktop_content_position }} page-width">
+		<div class="banner__box content-container content-container--full-width-mobile color-{{ section.settings.color_scheme }} gradient">
+			{%- if section.settings.heading != blank -%}
+				<h2 class="banner__heading inline-richtext {{ section.settings.heading_size }}">
+					{{ section.settings.heading }}
+				</h2>
+			{%- endif -%}
+			{%- if section.settings.text != blank -%}
+				<div class="banner__text rte body">
+					<p>{{ section.settings.text }}</p>
+				</div>
+			{%- endif -%}
+			{%- if section.settings.button_label != blank -%}
+				<div class="banner__buttons">
+					<a
+						{% if section.settings.button_link == blank %}
+							role="link"
+							aria-disabled="true"
+						{% else %}
+							href="{{ section.settings.button_link }}"
+						{% endif %}
+						class="button{% if section.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}"
+					>
+						{{- section.settings.button_label | escape -}}
+					</a>
+				</div>
+			{%- endif -%}
+		</div>
+	</div>
+</div>
+
+{% schema %}
+	{
+		"name": "Hero background slider",
+		"tag": "section",
+		"class": "section",
+		"disabled_on": {
+			"groups": ["header", "footer"]
+		},
+		"max_blocks": 6,
+		"settings": [
+			{
+				"type": "text",
+				"id": "heading",
+				"label": "Heading",
+				"default": "Maison Affinage"
+			},
+			{
+				"type": "select",
+				"id": "heading_size",
+				"options": [
+					{ "value": "h2", "label": "Small" },
+					{ "value": "h1", "label": "Medium" },
+					{ "value": "h0", "label": "Large" }
+				],
+				"default": "h0",
+				"label": "Heading size"
+			},
+			{
+				"type": "textarea",
+				"id": "text",
+				"label": "Text",
+				"default": "Cheeses aged in our cave, cut to order, and shipped cold."
+			},
+			{
+				"type": "text",
+				"id": "button_label",
+				"label": "Button label",
+				"default": "Shop the cave"
+			},
+			{
+				"type": "url",
+				"id": "button_link",
+				"label": "Button link"
+			},
+			{
+				"type": "checkbox",
+				"id": "button_style_secondary",
+				"label": "Use outline button style",
+				"default": false
+			},
+			{
+				"type": "range",
+				"id": "image_overlay_opacity",
+				"min": 0,
+				"max": 100,
+				"step": 10,
+				"unit": "%",
+				"label": "Image overlay opacity",
+				"default": 50
+			},
+			{
+				"type": "select",
+				"id": "image_height",
+				"options": [
+					{ "value": "small", "label": "Small" },
+					{ "value": "medium", "label": "Medium" },
+					{ "value": "large", "label": "Large" }
+				],
+				"default": "large",
+				"label": "Banner height"
+			},
+			{
+				"type": "select",
+				"id": "desktop_content_position",
+				"options": [
+					{ "value": "top-left", "label": "Top left" },
+					{ "value": "top-center", "label": "Top center" },
+					{ "value": "top-right", "label": "Top right" },
+					{ "value": "middle-left", "label": "Middle left" },
+					{ "value": "middle-center", "label": "Middle center" },
+					{ "value": "middle-right", "label": "Middle right" },
+					{ "value": "bottom-left", "label": "Bottom left" },
+					{ "value": "bottom-center", "label": "Bottom center" },
+					{ "value": "bottom-right", "label": "Bottom right" }
+				],
+				"default": "middle-center",
+				"label": "Desktop content position"
+			},
+			{
+				"type": "checkbox",
+				"id": "show_text_box",
+				"default": false,
+				"label": "Show text box on desktop"
+			},
+			{
+				"type": "select",
+				"id": "desktop_content_alignment",
+				"options": [
+					{ "value": "left", "label": "Left" },
+					{ "value": "center", "label": "Center" },
+					{ "value": "right", "label": "Right" }
+				],
+				"default": "center",
+				"label": "Desktop content alignment"
+			},
+			{
+				"type": "color_scheme",
+				"id": "color_scheme",
+				"label": "Color scheme",
+				"default": "scheme-3"
+			},
+			{
+				"type": "select",
+				"id": "mobile_content_alignment",
+				"options": [
+					{ "value": "left", "label": "Left" },
+					{ "value": "center", "label": "Center" },
+					{ "value": "right", "label": "Right" }
+				],
+				"default": "center",
+				"label": "Mobile content alignment"
+			},
+			{
+				"type": "checkbox",
+				"id": "show_text_below",
+				"default": false,
+				"label": "Show text below image on mobile"
+			},
+			{
+				"type": "range",
+				"id": "autoplay_delay",
+				"min": 3000,
+				"max": 9000,
+				"step": 1000,
+				"unit": "ms",
+				"label": "Autoplay delay",
+				"default": 5000
+			},
+			{
+				"type": "checkbox",
+				"id": "show_pagination",
+				"label": "Show dots",
+				"default": true
+			}
+		],
+		"blocks": [
+			{
+				"type": "image",
+				"name": "Background image",
+				"settings": [
+					{
+						"type": "image_picker",
+						"id": "image",
+						"label": "Image"
+					}
+				]
+			}
+		],
+		"presets": [
+			{
+				"name": "Hero background slider",
+				"blocks": [{ "type": "image" }, { "type": "image" }, { "type": "image" }]
+			}
+		]
+	}
+{% endschema %}
