@@ -69,14 +69,14 @@ jobs:
       - name: Check if theme exists
         id: check-theme
         run: |
-          if pnpm exec shopify theme pull --theme ${{ env.THEME_NAME }} --store vincent-store-dev.myshopify.com --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}; then
+          themes="$(pnpm exec shopify theme list --json --name "${THEME_NAME}" --store vincent-store-dev.myshopify.com --password "${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}")"
+          if echo "${themes}" | jq -e --arg name "${THEME_NAME}" '(if type == "array" then . else (.themes // []) end) | any(.name == $name)' > /dev/null; then
             echo "Theme exists"
-            echo "THEME_EXISTS=true" >> $GITHUB_ENV
+            echo "THEME_EXISTS=true" >> "${GITHUB_ENV}"
           else
             echo "Theme does not exist"
-            echo "THEME_EXISTS=false" >> $GITHUB_ENV
+            echo "THEME_EXISTS=false" >> "${GITHUB_ENV}"
           fi
-        continue-on-error: true
 
       - name: Create new theme if it doesn't exist
         if: env.THEME_EXISTS == 'false'
@@ -151,8 +151,7 @@ jobs:
             --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
 
   deploy-production:
-    needs: deploy-staging
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -176,8 +175,9 @@ jobs:
 
       - name: Deploy theme to Shopify Production
         run: |
-          pnpm exec shopify theme push --live \
+          pnpm exec shopify theme push \
             --json \
+            --allow-live \
             --theme 136285159539 \
             --store vincent-store-dev.myshopify.com \
             --password ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
