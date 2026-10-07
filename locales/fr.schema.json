@@ -275,6 +275,24 @@
             "label": "Seuil du cadeau offert",
             "info": "Montant dans la devise de la boutique (ex. 80 pour 80 €). Mettre 0 pour désactiver."
           }
+        },
+        "cart_free_sample": {
+          "header": "Échantillons offerts",
+          "enabled": {
+            "label": "Activer les échantillons offerts"
+          },
+          "collection": {
+            "label": "Collection d’échantillons",
+            "info": "Produits proposés au client dans le panier. Utilisez des produits à 0 € avec le tag free-sample."
+          },
+          "threshold": {
+            "label": "Seuil des échantillons offerts",
+            "info": "Montant dans la devise de la boutique (ex. 150 pour 150 €). Mettre 0 pour désactiver."
+          },
+          "max": {
+            "label": "Nombre maximum d’échantillons",
+            "info": "Nombre maximum d’échantillons offerts que le client peut ajouter au panier."
+          }
         }
       }
     },

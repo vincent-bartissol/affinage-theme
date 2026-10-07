@@ -26,6 +26,33 @@ class CartRemoveButton extends HTMLElement {
       }
     }
 
+    if (this.hasAttribute('data-free-sample')) {
+      try {
+        const variantId = Number(
+          this.querySelector('[data-variant-id]')?.dataset.variantId ||
+            this.closest('tr')?.querySelector('[data-quantity-variant-id]')?.dataset
+              .quantityVariantId,
+        );
+        if (variantId) {
+          const cartResponse = await fetch(`${routes.cart_url}.js`);
+          const cart = await cartResponse.json();
+          const current = String(cart.attributes?.free_sample_variant_ids || '')
+            .split(',')
+            .map((id) => Number(id.trim()))
+            .filter(Boolean)
+            .filter((id) => id !== variantId);
+          await fetch(`${routes.cart_update_url}`, {
+            ...fetchConfig(),
+            body: JSON.stringify({
+              attributes: { free_sample_variant_ids: current.join(',') },
+            }),
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     cartItems.updateQuantity(this.dataset.index, 0, event);
   }
 }
@@ -113,13 +140,20 @@ class CartItems extends HTMLElement {
         .then((response) => response.text())
         .then((responseText) => {
           const html = new DOMParser().parseFromString(responseText, 'text/html');
-          const selectors = ['cart-drawer-items', '.cart-drawer__footer'];
+          const selectors = [
+						"cart-drawer-items",
+						".cart-drawer__footer",
+						"[data-cart-pairing]",
+					];
           for (const selector of selectors) {
-            const targetElement = document.querySelector(selector);
-            const sourceElement = html.querySelector(selector);
-            if (targetElement && sourceElement) {
-              targetElement.replaceWith(sourceElement);
-            }
+            const targetElements = document.querySelectorAll(selector);
+						const sourceElements = html.querySelectorAll(selector);
+						targetElements.forEach((targetElement, index) => {
+							const sourceElement = sourceElements[index];
+							if (targetElement && sourceElement) {
+								targetElement.replaceWith(sourceElement);
+							}
+						});
           }
         })
         .catch((e) => {

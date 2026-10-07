@@ -1,0 +1,150 @@
+{% comment %}
+	Free-sample picker shown when the cart reaches the sample threshold.
+	Accepts: layout — 'page' (cart page) or 'drawer' (default).
+{% endcomment %}
+{%- liquid
+	assign sample_layout = layout | default: 'drawer'
+	assign sample_collection = settings.cart_free_sample_collection
+	assign sample_threshold = settings.cart_free_sample_threshold | default: 0 | times: 100
+	assign sample_max = settings.cart_free_sample_max | default: 2
+	if sample_max < 1
+		assign sample_max = 1
+	endif
+
+	assign sample_enabled = false
+	if settings.cart_free_sample_enabled and sample_collection != blank and sample_threshold > 0 and sample_collection.products_count > 0
+		assign sample_enabled = true
+	endif
+
+	assign gift_product = settings.cart_free_gift_product
+	assign eligible_total = 0
+	assign selected_count = 0
+	if sample_enabled
+		for item in cart.items
+			assign is_reward_line = false
+			if gift_product != blank and item.product.id == gift_product.id
+				assign is_reward_line = true
+			endif
+			if item.product.tags contains 'free-sample' or item.properties._sample == 'true'
+				assign is_reward_line = true
+				assign selected_count = selected_count | plus: 1
+			endif
+			unless is_reward_line
+				assign eligible_total = eligible_total | plus: item.final_line_price
+			endunless
+		endfor
+	endif
+
+	assign at_max = false
+	if selected_count >= sample_max
+		assign at_max = true
+	endif
+-%}
+
+{%- if sample_enabled and eligible_total >= sample_threshold -%}
+	<div
+		class="cart-free-sample cart-free-sample--{{ sample_layout }}{% if at_max %} is-at-max{% endif %}"
+		data-free-sample-picker
+	>
+		<div class="cart-free-sample__header">
+			<p class="cart-free-sample__title">{{ 'sections.cart.free_sample_title' | t }}</p>
+			<p class="cart-free-sample__count" aria-live="polite">
+				<span data-free-sample-count>{{ selected_count }}</span>
+				/ {{ sample_max }}
+			</p>
+			<p class="cart-free-sample__help">{{ 'sections.cart.free_sample_help' | t: max: sample_max }}</p>
+			<p
+				class="cart-free-sample__max-note"
+				data-free-sample-max-note
+				{% unless at_max %}
+					hidden
+				{% endunless %}
+			>
+				{{ 'sections.cart.free_sample_max_reached' | t }}
+			</p>
+		</div>
+
+		<ul class="cart-free-sample__list" role="list">
+			{%- for product in sample_collection.products -%}
+				{%- liquid
+					assign variant = product.selected_or_first_available_variant
+					unless variant.available
+						continue
+					endunless
+
+					assign is_selected = false
+					for item in cart.items
+						if item.variant.id == variant.id
+							assign is_selected = true
+							break
+						endif
+					endfor
+
+					assign is_disabled = false
+					if at_max and is_selected == false
+						assign is_disabled = true
+					endif
+
+					assign sample_label = product.title | remove: 'Échantillon ' | remove: 'Echantillon '
+					if sample_layout == 'page'
+						assign sample_image_sizes = '(min-width: 990px) 180px, (min-width: 750px) 200px, 45vw'
+					else
+						assign sample_image_sizes = '(min-width: 750px) 64px, 72px'
+					endif
+				-%}
+				<li
+					class="cart-free-sample__option{% if is_selected %} is-selected{% endif %}{% if is_disabled %} is-disabled{% endif %}"
+					data-variant-id="{{ variant.id }}"
+					{% if is_disabled %}
+						aria-disabled="true"
+					{% endif %}
+				>
+					{%- if product.featured_media -%}
+						{{
+							product.featured_media
+							| image_url: width: 480
+							| image_tag:
+								loading: 'lazy',
+								class: 'cart-free-sample__image',
+								widths: '96, 144, 240, 360, 480',
+								sizes: sample_image_sizes,
+								alt: product.title
+						}}
+					{%- endif -%}
+					<div class="cart-free-sample__body">
+						<p class="cart-free-sample__name">{{ sample_label | escape }}</p>
+						{%- if is_selected -%}
+							<p class="cart-free-sample__status">{{ 'sections.cart.free_sample_selected' | t }}</p>
+						{%- endif -%}
+					</div>
+					<div class="cart-free-sample__actions">
+						<button
+							type="button"
+							class="button button--secondary"
+							data-free-sample-add="{{ variant.id }}"
+							{% if is_selected %}
+								hidden
+							{% endif %}
+							{% if is_disabled %}
+								disabled
+								title="{{ 'sections.cart.free_sample_max_reached' | t | escape }}"
+							{% endif %}
+						>
+							{{ 'sections.cart.free_sample_add' | t }}
+						</button>
+						<button
+							type="button"
+							class="button button--secondary"
+							data-free-sample-remove="{{ variant.id }}"
+							{% unless is_selected %}
+								hidden
+							{% endunless %}
+						>
+							{{ 'sections.cart.free_sample_remove' | t }}
+						</button>
+					</div>
+				</li>
+			{%- endfor -%}
+		</ul>
+	</div>
+{%- endif -%}

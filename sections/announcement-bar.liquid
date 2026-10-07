@@ -15,8 +15,12 @@
 	if settings.cart_free_gift_enabled and settings.cart_free_gift_product != blank and settings.cart_free_gift_threshold > 0
 		assign free_gift_threshold = settings.cart_free_gift_threshold | times: 100
 	endif
+	assign free_sample_threshold = 0
+	if settings.cart_free_sample_enabled and settings.cart_free_sample_collection != blank and settings.cart_free_sample_threshold > 0
+		assign free_sample_threshold = settings.cart_free_sample_threshold | times: 100
+	endif
 	assign rewards_active = false
-	if free_shipping_threshold > 0 or free_gift_threshold > 0
+	if free_shipping_threshold > 0 or free_gift_threshold > 0 or free_sample_threshold > 0
 		assign rewards_active = true
 	endif
 	assign cart_has_items = false

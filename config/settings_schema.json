@@ -1475,6 +1475,36 @@
         "default": 80
       },
       {
+        "type": "header",
+        "content": "t:settings_schema.cart.settings.cart_free_sample.header"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_free_sample_enabled",
+        "label": "t:settings_schema.cart.settings.cart_free_sample.enabled.label",
+        "default": false
+      },
+      {
+        "type": "collection",
+        "id": "cart_free_sample_collection",
+        "label": "t:settings_schema.cart.settings.cart_free_sample.collection.label",
+        "info": "t:settings_schema.cart.settings.cart_free_sample.collection.info"
+      },
+      {
+        "type": "number",
+        "id": "cart_free_sample_threshold",
+        "label": "t:settings_schema.cart.settings.cart_free_sample.threshold.label",
+        "info": "t:settings_schema.cart.settings.cart_free_sample.threshold.info",
+        "default": 150
+      },
+      {
+        "type": "number",
+        "id": "cart_free_sample_max",
+        "label": "t:settings_schema.cart.settings.cart_free_sample.max.label",
+        "info": "t:settings_schema.cart.settings.cart_free_sample.max.info",
+        "default": 2
+      },
+      {
         "type": "color_scheme",
         "id": "cart_color_scheme",
         "label": "t:sections.all.colors.label",

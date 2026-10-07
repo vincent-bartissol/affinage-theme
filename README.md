@@ -68,6 +68,10 @@ Frontend entrypoints live in `frontend/entrypoints/` and are injected through th
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs Theme Check and Lighthouse. Lighthouse builds the theme, pushes a temporary preview, and audits the homepage, a product page, the `all` collection, and the cart.
 
+## Features
+
+See [`docs/features.md`](docs/features.md) for cart rewards (free shipping, free gift, free samples), announcement bar, product-card quick add, Maison Affinage storefront work, and CI notes.
+
 ## AI agents
 
 See [`AGENTS.md`](AGENTS.md) and [`.cursor/rules/`](.cursor/rules/) for conventions Cursor and other coding agents should follow in this repo.

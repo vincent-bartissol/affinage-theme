@@ -147,22 +147,22 @@ if (!customElements.get('quick-add-bulk')) {
 
       getSectionsToRender() {
         return [
-          {
-            id: `quick-add-bulk-${this.dataset.index}-${this.sectionId}`,
-            section: this.sectionId,
-            selector: `#quick-add-bulk-${this.dataset.index}-${this.sectionId}`,
-          },
-          {
-            id: 'cart-icon-bubble',
-            section: 'cart-icon-bubble',
-            selector: '.shopify-section',
-          },
-          {
-            id: 'CartDrawer',
-            selector: '.drawer__inner',
-            section: 'cart-drawer',
-          },
-        ];
+					{
+						id: `quick-add-bulk-${this.dataset.index}-${this.sectionId}`,
+						section: this.sectionId,
+						selector: `#quick-add-bulk-${this.dataset.index}-${this.sectionId}`,
+					},
+					{
+						id: "cart-icon-bubble",
+						section: "cart-icon-bubble",
+						selector: ".shopify-section",
+					},
+					{
+						id: "CartDrawer",
+						selector: ".cart-drawer__shell",
+						section: "cart-drawer",
+					},
+				];
       }
 
       renderSections(parsedState, ids) {

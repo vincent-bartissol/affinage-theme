@@ -1133,6 +1133,11 @@ class ProductRecommendations extends HTMLElement {
   }
 
   connectedCallback() {
+    if (this.dataset.eager === 'true') {
+      this.loadRecommendations(this.dataset.productId);
+      return;
+    }
+
     this.initializeRecommendations(this.dataset.productId);
   }
 
@@ -1149,25 +1154,47 @@ class ProductRecommendations extends HTMLElement {
     this.observer.observe(this);
   }
 
-  loadRecommendations(productId) {
-    fetch(`${this.dataset.url}&product_id=${productId}&section_id=${this.dataset.sectionId}`)
+  loadRecommendations(productId, intent) {
+    if (!productId) return;
+
+    const requestUrl = new URL(this.dataset.url, window.location.origin);
+    requestUrl.searchParams.set('product_id', productId);
+    requestUrl.searchParams.set('section_id', this.dataset.sectionId);
+    if (intent) requestUrl.searchParams.set('intent', intent);
+
+    fetch(`${requestUrl.pathname}${requestUrl.search}`)
       .then((response) => response.text())
       .then((text) => {
         const html = document.createElement('div');
         html.innerHTML = text;
         const recommendations = html.querySelector('product-recommendations');
+        const hasContent = Boolean(recommendations?.innerHTML.trim().length);
 
-        if (recommendations?.innerHTML.trim().length) {
-          this.innerHTML = recommendations.innerHTML;
-        }
+        if (hasContent) {
+					this.innerHTML = recommendations.innerHTML;
+					this.classList.add("product-recommendations--loaded");
+					return;
+				}
+
+				const fallbackIntent = this.dataset.fallbackIntent;
+				if (
+					fallbackIntent &&
+					intent !== fallbackIntent &&
+					!this.dataset.fallbackAttempted
+				) {
+					this.dataset.fallbackAttempted = "true";
+					this.loadRecommendations(productId, fallbackIntent);
+					return;
+				}
+
+				if (this.dataset.hideWhenEmpty === "true") {
+					this.closest("[data-cart-pairing]")?.setAttribute("hidden", "");
+					this.setAttribute("hidden", "");
+				}
 
         if (!this.querySelector('slideshow-component') && this.classList.contains('complementary-products')) {
-          this.remove();
-        }
-
-        if (html.querySelector('.grid__item')) {
-          this.classList.add('product-recommendations--loaded');
-        }
+					this.remove();
+				}
       })
       .catch((e) => {
         console.error(e);

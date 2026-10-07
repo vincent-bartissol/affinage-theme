@@ -84,15 +84,23 @@
 										if settings.cart_free_gift_enabled and settings.cart_free_gift_product != blank and item.product.id == settings.cart_free_gift_product.id
 											assign is_free_gift = true
 										endif
+										assign is_free_sample = false
+										if item.product.tags contains 'free-sample' or item.properties._sample == 'true'
+											assign is_free_sample = true
+										endif
+										assign is_reward_line = false
+										if is_free_gift or is_free_sample
+											assign is_reward_line = true
+										endif
 									-%}
 									<tr
-										class="cart-item{% if is_free_gift %} cart-item--free-gift{% endif %}"
+										class="cart-item{% if is_free_gift %} cart-item--free-gift{% endif %}{% if is_free_sample %} cart-item--free-sample{% endif %}"
 										id="CartItem-{{ item.index | plus: 1 }}"
 									>
 										<td class="cart-item__media">
 											{% if item.image %}
 												{% comment %} Leave empty space due to a:empty CSS display: none rule {% endcomment %}
-												{%- unless is_free_gift -%}
+												{%- unless is_reward_line -%}
 													<a href="{{ item.url }}" class="cart-item__link" aria-hidden="true" tabindex="-1"></a>
 												{%- endunless -%}
 												<div class="cart-item__image-container gradient global-media-settings">
@@ -116,6 +124,11 @@
 											{%- if is_free_gift -%}
 												<p class="cart-item__free-gift-badge caption-with-letter-spacing">
 													{{ 'sections.cart.free_gift_badge' | t }}
+												</p>
+												<span class="cart-item__name h4 break">{{ item.product.title | escape }}</span>
+											{%- elsif is_free_sample -%}
+												<p class="cart-item__free-gift-badge caption-with-letter-spacing">
+													{{ 'sections.cart.free_sample_badge' | t }}
 												</p>
 												<span class="cart-item__name h4 break">{{ item.product.title | escape }}</span>
 											{%- else -%}
@@ -181,10 +194,16 @@
 
 											<ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
 												{%- for discount in item.line_level_discount_allocations -%}
-													<li class="discounts__discount">
-														{{- 'icon-discount.svg' | inline_asset_content -}}
-														{{ discount.discount_application.title | escape }}
-													</li>
+													{%- comment -%}
+														Skip €0 allocations. Automatic free-gift discounts sometimes attach
+														a zero-amount application to other lines and split them in the cart.
+													{%- endcomment -%}
+													{%- if discount.amount > 0 -%}
+														<li class="discounts__discount">
+															{{- 'icon-discount.svg' | inline_asset_content -}}
+															{{ discount.discount_application.title | escape }}
+														</li>
+													{%- endif -%}
 												{%- endfor -%}
 											</ul>
 										</td>
@@ -249,7 +268,7 @@
 														{{ 'products.product.quantity.label' | t }}
 													</label>
 													<div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
-														{%- unless is_free_gift -%}
+														{%- unless is_reward_line -%}
 															{%- if has_qty_rules or has_vol_pricing -%}
 																<button
 																	type="button"
@@ -323,11 +342,15 @@
 														{% if is_free_gift %}
 															data-free-gift
 														{% endif %}
+														{% if is_free_sample %}
+															data-free-sample
+														{% endif %}
 													>
 														<a
 															href="{{ item.url_to_remove }}"
 															class="button button--tertiary"
 															aria-label="{{ 'sections.cart.remove_title' | t: title: item.title | escape }}"
+															data-variant-id="{{ item.variant.id }}"
 														>
 															<span class="svg-wrapper">
 																{{- 'icon-remove.svg' | inline_asset_content -}}
@@ -476,6 +499,7 @@
 							</tbody>
 						</table>
 					{%- endif -%}
+					{% render 'cart-free-sample', layout: 'page' %}
 				</div>
 			</div>
 

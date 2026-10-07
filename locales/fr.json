@@ -319,9 +319,19 @@
       "free_shipping_unlocked_gift_remaining_html": "Livraison froide offerte débloquée. Plus que {{ amount }} pour le cadeau.",
       "free_gift_remaining_html": "Plus que {{ amount }} pour le cadeau offert.",
       "free_gift_unlocked": "Cadeau offert débloqué.",
-      "rewards_unlocked": "Livraison froide offerte et cadeau débloqués.",
+      "free_gift_unlocked_sample_remaining_html": "Cadeau offert débloqué. Plus que {{ amount }} pour les échantillons.",
+      "free_sample_remaining_html": "Plus que {{ amount }} pour les échantillons offerts.",
+      "free_sample_unlocked": "Échantillons offerts débloqués.",
+      "rewards_unlocked": "Toutes les récompenses panier sont débloquées.",
       "free_gift_badge": "Cadeau offert",
-      "free_gift_add_again": "Ajouter à nouveau le cadeau"
+      "free_gift_add_again": "Ajouter à nouveau le cadeau",
+      "free_sample_badge": "Échantillon offert",
+      "free_sample_title": "Vos échantillons offerts",
+      "free_sample_help": "Choisissez jusqu’à {{ max }}. Ils sont ajoutés gratuitement à votre panier.",
+      "free_sample_add": "Ajouter",
+      "free_sample_remove": "Retirer",
+      "free_sample_selected": "Dans votre panier",
+      "free_sample_max_reached": "Maximum atteint. Retirez un échantillon pour en choisir un autre."
     },
     "footer": {
       "payment": "Moyens de paiement"
@@ -370,7 +380,10 @@
       "free_gift_from_html": "Cadeau offert dès {{ amount }}",
       "free_gift_remaining_html": "Plus que {{ amount }} pour le cadeau offert",
       "free_gift_unlocked": "Cadeau offert débloqué",
-      "rewards_unlocked": "Livraison et cadeau offerts débloqués"
+      "free_sample_from_html": "Échantillons offerts dès {{ amount }}",
+      "free_sample_remaining_html": "Plus que {{ amount }} pour les échantillons offerts",
+      "free_sample_unlocked": "Échantillons offerts débloqués",
+      "rewards_unlocked": "Toutes les récompenses panier débloquées"
     },
     "quick_order_list": {
       "product_total": "Sous-total des produits",
