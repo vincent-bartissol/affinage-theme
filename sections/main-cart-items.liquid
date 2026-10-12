@@ -77,7 +77,7 @@
 								</tr>
 							</thead>
 
-							<tbody>
+							<tbody data-cart-list="items">
 								{%- for item in cart.items -%}
 									{%- liquid
 										assign is_free_gift = false
@@ -96,6 +96,7 @@
 									<tr
 										class="cart-item{% if is_free_gift %} cart-item--free-gift{% endif %}{% if is_free_sample %} cart-item--free-sample{% endif %}"
 										id="CartItem-{{ item.index | plus: 1 }}"
+										data-cart-line="{{ item.variant.id }}"
 									>
 										<td class="cart-item__media">
 											{% if item.image %}

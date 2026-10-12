@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@formkit/auto-animate':
+        specifier: ^0.10.0
+        version: 0.10.0
+      gsap:
+        specifier: ^3.15.0
+        version: 3.15.0
       swiper:
         specifier: ^11.2.10
         version: 11.2.10
@@ -311,6 +317,9 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@formkit/auto-animate@0.10.0':
+    resolution: {integrity: sha512-KGomRttjUfORuPUaR/ZGQw+6xfMrTM+sxnILv7JAd9AmabU9rg9i6gF/iC0Ih+QpKCubJpCA/1DX9UHKE8cX+A==}
 
   '@graphql-typed-document-node/core@3.2.0':
     resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
@@ -1408,6 +1417,9 @@ packages:
   graphql@16.14.2:
     resolution: {integrity: sha512-Chq1s4CY7jmh8gO2qvLIJyfCDIN+EHLFW/9iShnp1z8FjBQMoodWP1kDC36VAMXXIvAjj4ARa7ntfAV2BrjsbA==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
+
+  gsap@3.15.0:
+    resolution: {integrity: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==}
 
   h3@1.15.11:
     resolution: {integrity: sha512-L3THSe2MPeBwgIZVSH5zLdBBU90TOxarvhK9d04IDY2AmVS8j2Jz2LIWtwsGOU3lu2I5jCN7FNvVfY2+XyF+mg==}
@@ -2830,6 +2842,8 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
+  '@formkit/auto-animate@0.10.0': {}
+
   '@graphql-typed-document-node/core@3.2.0(graphql@16.14.2)':
     dependencies:
       graphql: 16.14.2
@@ -3978,6 +3992,8 @@ snapshots:
       - encoding
 
   graphql@16.14.2: {}
+
+  gsap@3.15.0: {}
 
   h3@1.15.11:
     dependencies:

@@ -151,7 +151,18 @@ class CartItems extends HTMLElement {
 						targetElements.forEach((targetElement, index) => {
 							const sourceElement = sourceElements[index];
 							if (targetElement && sourceElement) {
-								targetElement.replaceWith(sourceElement);
+								if (
+									targetElement.querySelector("[data-cart-list]") &&
+									window.maisonSetCartSectionHTML
+								) {
+									targetElement.className = sourceElement.className;
+									window.maisonSetCartSectionHTML(
+										targetElement,
+										sourceElement.innerHTML,
+									);
+								} else {
+									targetElement.replaceWith(sourceElement);
+								}
 							}
 						});
           }
@@ -171,7 +182,13 @@ class CartItems extends HTMLElement {
           if (itemsHtml) {
             const html = new DOMParser().parseFromString(itemsHtml, 'text/html');
             const sourceQty = html.querySelector('cart-items');
-            if (sourceQty) this.innerHTML = sourceQty.innerHTML;
+            if (sourceQty) {
+							if (window.maisonSetCartSectionHTML) {
+								window.maisonSetCartSectionHTML(this, sourceQty.innerHTML);
+							} else {
+								this.innerHTML = sourceQty.innerHTML;
+							}
+						}
           }
 
           if (footer?.dataset.id && parsedState[footer.dataset.id]) {
@@ -254,10 +271,15 @@ class CartItems extends HTMLElement {
           this.getSectionsToRender().forEach((section) => {
             const elementToReplace =
               document.getElementById(section.id).querySelector(section.selector) || document.getElementById(section.id);
-            elementToReplace.innerHTML = this.getSectionInnerHTML(
-              parsedState.sections[section.section],
-              section.selector
-            );
+            const sectionHTML = this.getSectionInnerHTML(
+							parsedState.sections[section.section],
+							section.selector,
+						);
+            if (window.maisonSetCartSectionHTML) {
+							window.maisonSetCartSectionHTML(elementToReplace, sectionHTML);
+						} else {
+							elementToReplace.innerHTML = sectionHTML;
+						}
           });
           const updatedValue = parsedState.items[line - 1] ? parsedState.items[line - 1].quantity : undefined;
           let message = '';

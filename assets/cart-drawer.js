@@ -80,7 +80,15 @@ class CartDrawer extends HTMLElement {
         : document.getElementById(section.id);
 
       if (!sectionElement) return;
-      sectionElement.innerHTML = this.getSectionInnerHTML(parsedState.sections[section.id], section.selector);
+      const sectionHTML = this.getSectionInnerHTML(
+				parsedState.sections[section.id],
+				section.selector,
+			);
+			if (window.maisonSetCartSectionHTML) {
+				window.maisonSetCartSectionHTML(sectionElement, sectionHTML);
+			} else {
+				sectionElement.innerHTML = sectionHTML;
+			}
     });
 
     setTimeout(() => {
