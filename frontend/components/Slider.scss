@@ -86,6 +86,22 @@
 	}
 }
 
+/* Swiper sits under the banner text layer, so let clicks pass through to the dots. */
+.banner:has(.hero-background-slider) {
+	&::after,
+	.banner__media::after {
+		pointer-events: none;
+	}
+
+	.banner__content {
+		pointer-events: none;
+	}
+
+	.banner__box {
+		pointer-events: auto;
+	}
+}
+
 /* Fill Dawn banner__media; text stays in banner__content */
 .banner__media .hero-background-slider {
 	display: block;
@@ -114,9 +130,11 @@
 
 	&__pagination {
 		bottom: 1.25rem !important;
-		z-index: 2;
+		z-index: 3;
+		pointer-events: auto;
 
 		.swiper-pagination-bullet {
+			cursor: pointer;
 			background: #f7f3ec;
 			opacity: 0.45;
 		}
