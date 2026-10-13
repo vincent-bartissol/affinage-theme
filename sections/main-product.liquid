@@ -82,6 +82,7 @@
 				<section
 					id="ProductInfo-{{ section.id }}"
 					class="product__info-container{% if section.settings.enable_sticky_info %} product__column-sticky{% endif %}"
+					tabindex="-1"
 				>
 					{%- assign product_form_id = 'product-form-' | append: section.id -%}
 

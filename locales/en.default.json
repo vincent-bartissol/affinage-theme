@@ -63,7 +63,10 @@
     "button_label": "Subscribe"
   },
   "accessibility": {
+    "skip_links": "Skip links",
     "skip_to_text": "Skip to content",
+    "skip_to_navigation": "Skip to navigation",
+    "skip_to_footer": "Skip to footer",
     "skip_to_product_info": "Skip to product information",
     "close": "Close",
     "unit_price_separator": "per",
