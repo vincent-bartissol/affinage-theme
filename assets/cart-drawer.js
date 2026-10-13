@@ -85,12 +85,16 @@ class CartDrawer extends HTMLElement {
         const doc = new DOMParser().parseFromString(parsedState.sections[section.id], 'text/html');
         const incoming = doc.querySelector(section.selector);
         if (!incoming) return;
-        preserveCartPairingPanels(sectionElement, incoming);
-        sectionElement.replaceChildren(...incoming.childNodes);
+        applyCartSectionUpdate(sectionElement, incoming);
         return;
       }
 
-      sectionElement.innerHTML = this.getSectionInnerHTML(parsedState.sections[section.id], section.selector);
+      const sectionHTML = this.getSectionInnerHTML(parsedState.sections[section.id], section.selector);
+      if (window.maisonSetCartSectionHTML) {
+        window.maisonSetCartSectionHTML(sectionElement, sectionHTML);
+      } else {
+        sectionElement.innerHTML = sectionHTML;
+      }
     });
 
     setTimeout(() => {

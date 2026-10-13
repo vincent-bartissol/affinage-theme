@@ -4,9 +4,12 @@ import "@/components/AnnouncementFreeShipping";
 import "@/components/CardQuickAdd";
 import "@/components/CartFreeGift";
 import "@/components/CartFreeSample";
+import { initScrollReveal } from "@/components/ScrollReveal";
+import { installCartListMotion } from "@/components/CartListMotion";
 
 export default function initTheme() {
-	console.log("Theme initialized");
+	installCartListMotion();
+	initScrollReveal();
 }
 
 initTheme();

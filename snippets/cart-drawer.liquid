@@ -126,7 +126,7 @@
 											</tr>
 										</thead>
 
-										<tbody role="rowgroup">
+										<tbody data-cart-list="items" role="rowgroup">
 											{%- for item in cart.items -%}
 												{%- liquid
 													assign is_free_gift = false
@@ -145,6 +145,7 @@
 												<tr
 													id="CartDrawer-Item-{{ item.index | plus: 1 }}"
 													class="cart-item{% if is_free_gift %} cart-item--free-gift{% endif %}{% if is_free_sample %} cart-item--free-sample{% endif %}"
+													data-cart-line="{{ item.key | escape }}"
 													role="row"
 												>
 													<td class="cart-item__media" role="cell" headers="CartDrawer-ColumnProductImage">

@@ -59,6 +59,75 @@ class CartRemoveButton extends HTMLElement {
 
 customElements.define('cart-remove-button', CartRemoveButton);
 
+// Shopify rejects a cart change that leaves free samples or a free gift in
+// place once the paid total drops under their threshold. Drop those lines in
+// the same update as the quantity change.
+async function buildQuantityRequest(line, quantity, sections) {
+  const changeRequest = {
+    url: routes.cart_change_url,
+    body: { line, quantity, sections, sections_url: window.location.pathname },
+  };
+  const sampleEl = document.querySelector('cart-free-sample');
+  const giftEl = document.querySelector('cart-free-gift');
+  const sampleEnabled = sampleEl?.dataset.enabled === 'true';
+  const giftEnabled = giftEl?.dataset.enabled === 'true';
+  const sampleThreshold = Number(sampleEl?.dataset.threshold) || 0;
+  const giftThreshold = Number(giftEl?.dataset.threshold) || 0;
+  if ((!sampleEnabled || !sampleThreshold) && (!giftEnabled || !giftThreshold)) return changeRequest;
+
+  let cart;
+  try {
+    const response = await fetch(`${routes.cart_url}.js`);
+    if (!response.ok) return changeRequest;
+    cart = await response.json();
+  } catch (error) {
+    console.error(error);
+    return changeRequest;
+  }
+
+  const lineItem = cart.items[Number(line) - 1];
+  if (!lineItem) return changeRequest;
+
+  const sampleIds = new Set(
+    String(sampleEl?.dataset.variantIds || '')
+      .split(',')
+      .map((id) => Number(id.trim()))
+      .filter(Boolean)
+  );
+  const giftVariantId = Number(giftEl?.dataset.variantId) || 0;
+  const isSample = (item) =>
+    item.properties?._sample === 'true' || sampleIds.has(Number(item.variant_id));
+  const isGift = (item) =>
+    item.properties?._gift === 'true' || (giftVariantId > 0 && Number(item.variant_id) === giftVariantId);
+
+  const nextQuantity = Number(quantity);
+  let eligible = 0;
+  for (const item of cart.items) {
+    if (isSample(item) || isGift(item)) continue;
+    const qty = item.key === lineItem.key ? nextQuantity : Number(item.quantity);
+    eligible += Number(item.final_price) * qty;
+  }
+
+  const updates = {};
+  if (sampleEnabled && eligible < sampleThreshold) {
+    for (const item of cart.items) {
+      if (isSample(item)) updates[item.key] = 0;
+    }
+  }
+  if (giftEnabled && eligible < giftThreshold) {
+    for (const item of cart.items) {
+      if (isGift(item)) updates[item.key] = 0;
+    }
+  }
+  if (Object.keys(updates).length === 0) return changeRequest;
+
+  updates[lineItem.key] = nextQuantity;
+  return {
+    url: routes.cart_update_url,
+    body: { updates, sections, sections_url: window.location.pathname },
+  };
+}
+
 const CART_PAIRING_TARGET = 4;
 const CART_PAIRING_SKELETON_ITEM = `
 	<li class="cart-pairing__item cart-pairing__item--skeleton" aria-hidden="true">
@@ -184,6 +253,38 @@ function preserveCartPairingPanels(currentRoot, incomingRoot) {
   });
 }
 
+/**
+ * Refresh cart markup while keeping loaded pairing panels and, when present,
+ * the cart-line motion helper.
+ */
+function applyCartSectionUpdate(currentElement, incomingElement, { replaceElement = false } = {}) {
+  if (!currentElement || !incomingElement) return;
+
+  preserveCartPairingPanels(currentElement, incomingElement);
+
+  if (typeof window.maisonSetCartSectionHTML === 'function') {
+    const panels = [...incomingElement.querySelectorAll('[data-cart-pairing]')];
+    panels.forEach((panel) => {
+      const marker = document.createElement('div');
+      marker.setAttribute('data-cart-pairing-preserve', '');
+      panel.replaceWith(marker);
+    });
+    currentElement.className = incomingElement.className;
+    window.maisonSetCartSectionHTML(currentElement, incomingElement.innerHTML);
+    currentElement.querySelectorAll('[data-cart-pairing-preserve]').forEach((marker, index) => {
+      if (panels[index]) marker.replaceWith(panels[index]);
+    });
+    return;
+  }
+
+  if (replaceElement) {
+    currentElement.replaceWith(incomingElement);
+    return;
+  }
+
+  currentElement.replaceChildren(...incomingElement.childNodes);
+}
+
 class CartItems extends HTMLElement {
   constructor() {
     super();
@@ -293,7 +394,15 @@ class CartItems extends HTMLElement {
 								}
 							}
 
-							targetElement.replaceWith(sourceElement);
+							if (
+								targetElement.querySelector('[data-cart-list]') &&
+								window.maisonSetCartSectionHTML
+							) {
+								targetElement.className = sourceElement.className;
+								window.maisonSetCartSectionHTML(targetElement, sourceElement.innerHTML);
+							} else {
+								targetElement.replaceWith(sourceElement);
+							}
 						});
           }
         })
@@ -312,7 +421,13 @@ class CartItems extends HTMLElement {
           if (itemsHtml) {
             const html = new DOMParser().parseFromString(itemsHtml, 'text/html');
             const sourceQty = html.querySelector('cart-items');
-            if (sourceQty) this.innerHTML = sourceQty.innerHTML;
+            if (sourceQty) {
+							if (window.maisonSetCartSectionHTML) {
+								window.maisonSetCartSectionHTML(this, sourceQty.innerHTML);
+							} else {
+								this.innerHTML = sourceQty.innerHTML;
+							}
+						}
           }
 
           if (footer?.dataset.id && parsedState[footer.dataset.id]) {
@@ -359,15 +474,13 @@ class CartItems extends HTMLElement {
   updateQuantity(line, quantity, event, name, variantId) {
     this.enableLoading(line);
 
-    const body = JSON.stringify({
-      line,
-      quantity,
-      sections: this.getSectionsToRender().map((section) => section.section),
-      sections_url: window.location.pathname,
-    });
+    const sections = this.getSectionsToRender().map((section) => section.section);
     const eventTarget = event.currentTarget instanceof CartRemoveButton ? 'clear' : 'change';
 
-    fetch(`${routes.cart_change_url}`, { ...fetchConfig(), ...{ body } })
+    buildQuantityRequest(line, quantity, sections)
+      .then((request) =>
+        fetch(request.url, { ...fetchConfig(), body: JSON.stringify(request.body) })
+      )
       .then((response) => {
         return response.text();
       })
@@ -404,15 +517,19 @@ class CartItems extends HTMLElement {
               );
               const incomingShell = doc.querySelector('.cart-drawer__shell');
               if (!incomingShell) return;
-              preserveCartPairingPanels(elementToReplace, incomingShell);
-              elementToReplace.replaceWith(incomingShell);
+              applyCartSectionUpdate(elementToReplace, incomingShell, { replaceElement: true });
               return;
             }
 
-            elementToReplace.innerHTML = this.getSectionInnerHTML(
+            const sectionHTML = this.getSectionInnerHTML(
               parsedState.sections[section.section],
               section.selector
             );
+            if (window.maisonSetCartSectionHTML) {
+              window.maisonSetCartSectionHTML(elementToReplace, sectionHTML);
+            } else {
+              elementToReplace.innerHTML = sectionHTML;
+            }
           });
           const updatedValue = parsedState.items[line - 1] ? parsedState.items[line - 1].quantity : undefined;
           let message = '';
