@@ -1,23 +1,10 @@
-import autoAnimate from "@formkit/auto-animate";
-
-const boundLists = new WeakSet();
-let applying = false;
+const DURATION = 240;
 
 function motionOff() {
 	return (
 		window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
 		window.Shopify?.designMode
 	);
-}
-
-function bind(list) {
-	if (!list || boundLists.has(list) || motionOff()) return;
-	boundLists.add(list);
-	autoAnimate(list, { duration: 220, easing: "ease-out" });
-}
-
-export function bindCartLists(root = document) {
-	root.querySelectorAll("[data-cart-list]").forEach(bind);
 }
 
 function rowKey(row) {
@@ -33,12 +20,114 @@ function copyAttributes(from, to) {
 	});
 }
 
-function syncKeyedChildren(liveParent, nextParent) {
-	bind(liveParent);
+function px(value) {
+	const parsed = Number.parseFloat(value);
+	return Number.isFinite(parsed) ? parsed : 0;
+}
 
+function isTableRow(row) {
+	return getComputedStyle(row).display === "table-row";
+}
+
+function fadeIn(row) {
+	if (!row.isConnected || motionOff()) return;
+	row.style.opacity = "0";
+	requestAnimationFrame(() => {
+		if (!row.isConnected) return;
+		row.style.transition = `opacity ${DURATION}ms ease-out`;
+		row.style.opacity = "1";
+		row.addEventListener(
+			"transitionend",
+			() => {
+				row.style.transition = "";
+				row.style.opacity = "";
+			},
+			{ once: true },
+		);
+	});
+}
+
+// Table rows ignore absolute positioning, which is how a generic list
+// animator exits. Shrink the cells instead so the line closes in place.
+function collapseTableRow(row) {
+	const cells = [...row.children];
+	cells.forEach((cell) => {
+		const styles = getComputedStyle(cell);
+		const contentHeight = Math.max(
+			0,
+			cell.getBoundingClientRect().height -
+				px(styles.paddingTop) -
+				px(styles.paddingBottom) -
+				px(styles.borderTopWidth) -
+				px(styles.borderBottomWidth),
+		);
+		const wrap = document.createElement("div");
+		wrap.style.overflow = "hidden";
+		wrap.style.height = `${contentHeight}px`;
+		while (cell.firstChild) wrap.appendChild(cell.firstChild);
+		cell.appendChild(wrap);
+		cell.style.overflow = "hidden";
+		cell.style.boxSizing = "border-box";
+	});
+
+	row.getBoundingClientRect();
+	row.style.transition = `opacity ${DURATION}ms ease-out`;
+	row.style.opacity = "0";
+	cells.forEach((cell) => {
+		const wrap = cell.firstElementChild;
+		if (wrap) {
+			wrap.style.transition = `height ${DURATION}ms ease-out`;
+			wrap.style.height = "0px";
+		}
+		cell.style.transition = `padding-top ${DURATION}ms ease-out, padding-bottom ${DURATION}ms ease-out`;
+		cell.style.paddingTop = "0px";
+		cell.style.paddingBottom = "0px";
+	});
+}
+
+function collapseBlockRow(row) {
+	const styles = getComputedStyle(row);
+	const height = row.getBoundingClientRect().height;
+	row.style.overflow = "hidden";
+	row.style.minHeight = "0px";
+	row.style.boxSizing = "border-box";
+	row.style.height = `${height}px`;
+	row.style.marginBottom = styles.marginBottom;
+	[...row.children].forEach((cell) => {
+		cell.style.overflow = "hidden";
+		cell.style.minHeight = "0px";
+	});
+
+	row.getBoundingClientRect();
+	row.style.transition = `height ${DURATION}ms ease-out, margin-bottom ${DURATION}ms ease-out, opacity ${DURATION}ms ease-out`;
+	row.style.height = "0px";
+	row.style.marginBottom = "0px";
+	row.style.opacity = "0";
+}
+
+function collapseRow(row) {
+	if (!row.isConnected || row.dataset.cartLeaving === "true") return;
+	row.dataset.cartLeaving = "true";
+	row.style.pointerEvents = "none";
+
+	if (motionOff()) {
+		row.remove();
+		return;
+	}
+
+	if (isTableRow(row)) collapseTableRow(row);
+	else collapseBlockRow(row);
+
+	window.setTimeout(() => {
+		row.remove();
+	}, DURATION);
+}
+
+function syncKeyedChildren(liveParent, nextParent) {
 	const nextChildren = [...nextParent.children];
 	const liveChildren = [...liveParent.children];
 	const liveByKey = new Map();
+	const entered = [];
 
 	liveChildren.forEach((child) => {
 		const key = rowKey(child);
@@ -46,18 +135,28 @@ function syncKeyedChildren(liveParent, nextParent) {
 	});
 
 	const nextKeys = new Set(nextChildren.map(rowKey).filter(Boolean));
-
-	liveChildren.forEach((child) => {
+	const leaving = liveChildren.filter((child) => {
 		const key = rowKey(child);
-		if (!key || !nextKeys.has(key)) child.remove();
+		return !key || !nextKeys.has(key);
 	});
+	const leavingSet = new Set(leaving);
+	leaving.forEach((row) => {
+		row.removeAttribute("id");
+	});
+
+	const stableChild = (index) => {
+		const stable = [...liveParent.children].filter(
+			(child) => !leavingSet.has(child),
+		);
+		return stable[index] || null;
+	};
 
 	nextChildren.forEach((nextChild, index) => {
 		const key = rowKey(nextChild);
 		const existing = key ? liveByKey.get(key) : null;
-		const anchor = liveParent.children[index] || null;
+		const anchor = stableChild(index);
 
-		if (existing && existing.isConnected) {
+		if (existing && existing.isConnected && !leavingSet.has(existing)) {
 			copyAttributes(nextChild, existing);
 			if (existing.innerHTML !== nextChild.innerHTML) {
 				existing.innerHTML = nextChild.innerHTML;
@@ -67,7 +166,10 @@ function syncKeyedChildren(liveParent, nextParent) {
 		}
 
 		liveParent.insertBefore(nextChild, anchor);
+		entered.push(nextChild);
 	});
+
+	return { leaving, entered };
 }
 
 export function setCartSectionHTML(element, html) {
@@ -77,55 +179,41 @@ export function setCartSectionHTML(element, html) {
 	template.innerHTML = html;
 
 	const liveLists = [...element.querySelectorAll("[data-cart-list]")];
+	const motions = [];
 	let preserved = false;
 
-	applying = true;
-	try {
-		liveLists.forEach((live) => {
-			const key = live.getAttribute("data-cart-list");
-			if (!key) return;
-			const next = template.content.querySelector(
-				`[data-cart-list="${CSS.escape(key)}"]`,
-			);
-			if (!next) return;
+	liveLists.forEach((live) => {
+		const key = live.getAttribute("data-cart-list");
+		if (!key) return;
+		const next = template.content.querySelector(
+			`[data-cart-list="${CSS.escape(key)}"]`,
+		);
+		if (!next) return;
 
-			if (motionOff()) {
-				live.innerHTML = next.innerHTML;
-			} else {
-				syncKeyedChildren(live, next);
-			}
-
-			next.replaceWith(live);
-			preserved = true;
-		});
-
-		if (!preserved) {
-			element.innerHTML = html;
-			bindCartLists(element);
-			return;
+		if (motionOff()) {
+			live.innerHTML = next.innerHTML;
+		} else {
+			motions.push(syncKeyedChildren(live, next));
 		}
 
-		element.replaceChildren(...template.content.childNodes);
-		bindCartLists(element);
-	} finally {
-		applying = false;
+		next.replaceWith(live);
+		preserved = true;
+	});
+
+	if (!preserved) {
+		element.innerHTML = html;
+		return;
 	}
+
+	element.replaceChildren(...template.content.childNodes);
+	requestAnimationFrame(() => {
+		motions.forEach(({ leaving, entered }) => {
+			leaving.forEach(collapseRow);
+			entered.forEach(fadeIn);
+		});
+	});
 }
 
 export function installCartListMotion() {
 	window.maisonSetCartSectionHTML = setCartSectionHTML;
-	bindCartLists();
-
-	const observer = new MutationObserver(() => {
-		if (applying) return;
-		bindCartLists();
-	});
-
-	document.querySelectorAll("cart-drawer, #main-cart-items").forEach((node) => {
-		observer.observe(node, { childList: true, subtree: true });
-	});
-
-	document.addEventListener("shopify:section:load", (event) => {
-		bindCartLists(event.target);
-	});
 }
