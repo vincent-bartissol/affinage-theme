@@ -1134,6 +1134,9 @@ class ProductRecommendations extends HTMLElement {
 
   connectedCallback() {
     if (this.dataset.eager === 'true') {
+      // Preserve already-loaded pairing panels when the node is moved in the DOM
+      // (cart drawer refresh reconnects the element and would otherwise refetch).
+      if (this.classList.contains('product-recommendations--loaded')) return;
       this.loadRecommendations(this.dataset.productId);
       return;
     }
