@@ -37,12 +37,13 @@
 		<div class="cart-pairing cart-pairing--pending" aria-busy="true">
 			<p class="cart-pairing__title">{{ 'sections.cart.pairing_title' | t }}</p>
 			<ul class="cart-pairing__list" role="list">
-				{%- for i in (1..3) -%}
+				{%- for i in (1..4) -%}
 					<li class="cart-pairing__item cart-pairing__item--skeleton" aria-hidden="true">
 						<span class="cart-pairing__media"></span>
 						<span class="cart-pairing__meta">
-							<span class="cart-pairing__skeleton-line"></span>
-							<span class="cart-pairing__skeleton-line cart-pairing__skeleton-line--short"></span>
+							<span class="cart-pairing__skeleton-name"></span>
+							<span class="cart-pairing__skeleton-price"></span>
+							<span class="cart-pairing__skeleton-cta"></span>
 						</span>
 					</li>
 				{%- endfor -%}

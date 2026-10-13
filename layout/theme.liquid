@@ -320,9 +320,17 @@
 			</script>
 		{%- endif -%}
 
-		<a class="skip-to-content-link button visually-hidden" href="#MainContent">
-			{{ 'accessibility.skip_to_text' | t }}
-		</a>
+		<nav class="skip-links" aria-label="{{ 'accessibility.skip_links' | t }}">
+			<a class="skip-link button" href="#MainContent">
+				{{ 'accessibility.skip_to_text' | t }}
+			</a>
+			<a class="skip-link button" href="#SiteHeader">
+				{{ 'accessibility.skip_to_navigation' | t }}
+			</a>
+			<a class="skip-link button" href="#SiteFooter">
+				{{ 'accessibility.skip_to_footer' | t }}
+			</a>
+		</nav>
 
 		{%- if settings.cart_type == 'drawer' -%}
 			{%- render 'cart-drawer' -%}
