@@ -6,6 +6,34 @@
 @use "@/components/Slider.scss";
 @use "@/components/CardQuickAdd.scss";
 
+/* Tailwind's .grid { display: grid } overrides Dawn's flex announcement slider. */
+.announcement-bar .slider.grid {
+	display: flex;
+	flex-wrap: nowrap;
+	row-gap: 0;
+	margin-bottom: 0;
+}
+
+.announcement-bar .slider.grid .slider__slide {
+	flex: 0 0 100%;
+	max-width: 100%;
+	width: 100%;
+}
+
+.announcement-bar__message {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 3.8rem;
+	box-sizing: border-box;
+}
+
+/* Controllers render before the header group; keep them out of document flow. */
+cart-free-gift,
+cart-free-sample {
+	display: none;
+}
+
 /* Maison Affinage — product cards & storefront polish */
 :root {
 	--maison-ink: #1c1915;
