@@ -1157,22 +1157,34 @@ class ProductRecommendations extends HTMLElement {
   loadRecommendations(productId, intent) {
     if (!productId) return;
 
+    this._recommendationsAbort?.abort();
+    const abortController = new AbortController();
+    this._recommendationsAbort = abortController;
+
     const requestUrl = new URL(this.dataset.url, window.location.origin);
     requestUrl.searchParams.set('product_id', productId);
     requestUrl.searchParams.set('section_id', this.dataset.sectionId);
     if (intent) requestUrl.searchParams.set('intent', intent);
 
-    fetch(`${requestUrl.pathname}${requestUrl.search}`)
+    fetch(`${requestUrl.pathname}${requestUrl.search}`, { signal: abortController.signal })
       .then((response) => response.text())
       .then((text) => {
+        if (abortController.signal.aborted) return;
+
         const html = document.createElement('div');
         html.innerHTML = text;
         const recommendations = html.querySelector('product-recommendations');
         const hasContent = Boolean(recommendations?.innerHTML.trim().length);
 
         if (hasContent) {
-					this.innerHTML = recommendations.innerHTML;
+					if (this.querySelector('.cart-pairing__item--skeleton')) {
+						this.mergeCartPairingSlots(recommendations);
+					} else {
+						this.innerHTML = recommendations.innerHTML;
+					}
 					this.classList.add("product-recommendations--loaded");
+					this.removeAttribute("hidden");
+					this.closest("[data-cart-pairing]")?.removeAttribute("hidden");
 					return;
 				}
 
@@ -1187,6 +1199,11 @@ class ProductRecommendations extends HTMLElement {
 					return;
 				}
 
+				// Keep an already-visible panel if a refresh returns empty (transient API miss).
+				if (this.classList.contains("product-recommendations--loaded")) {
+					return;
+				}
+
 				if (this.dataset.hideWhenEmpty === "true") {
 					this.closest("[data-cart-pairing]")?.setAttribute("hidden", "");
 					this.setAttribute("hidden", "");
@@ -1197,8 +1214,58 @@ class ProductRecommendations extends HTMLElement {
 				}
       })
       .catch((e) => {
+        if (e?.name === "AbortError") return;
         console.error(e);
       });
+  }
+
+  /**
+   * Fill skeleton slots only so remaining pairing cards keep their positions.
+   * Example: add the 3rd card → only slot 3 is replaced after fetch.
+   */
+  mergeCartPairingSlots(source) {
+    const list = this.querySelector('.cart-pairing__list');
+    if (!list) {
+      this.innerHTML = source.innerHTML;
+      return;
+    }
+
+    const keptVariantIds = new Set(
+      Array.from(
+        list.querySelectorAll(
+          '.cart-pairing__item:not(.cart-pairing__item--skeleton) [name="id"], .cart-pairing__item:not(.cart-pairing__item--skeleton) .product-variant-id'
+        )
+      )
+        .map((el) => el.value)
+        .filter(Boolean)
+    );
+
+    const candidates = Array.from(source.querySelectorAll('.cart-pairing__item')).filter((item) => {
+      const variantId = item.querySelector('[name="id"], .product-variant-id')?.value;
+      return variantId && !keptVariantIds.has(variantId);
+    });
+
+    list.querySelectorAll('.cart-pairing__item--skeleton').forEach((skeleton) => {
+      const next = candidates.shift();
+      if (next) {
+        const slotHeight =
+          Number(skeleton.dataset.slotHeight) || skeleton.getBoundingClientRect().height;
+        if (slotHeight > 0) {
+          // min-height only: avoids compressing the image/title gap.
+          const height = `${Math.round(slotHeight)}px`;
+          next.dataset.slotHeight = String(Math.round(slotHeight));
+          next.style.boxSizing = 'border-box';
+          next.style.minHeight = height;
+        }
+        skeleton.replaceWith(next);
+      } else {
+        skeleton.remove();
+      }
+    });
+
+    const pairing = this.querySelector('.cart-pairing');
+    pairing?.classList.remove('cart-pairing--pending');
+    pairing?.removeAttribute('aria-busy');
   }
 }
 
