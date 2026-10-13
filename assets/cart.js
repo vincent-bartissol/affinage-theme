@@ -59,6 +59,75 @@ class CartRemoveButton extends HTMLElement {
 
 customElements.define('cart-remove-button', CartRemoveButton);
 
+// Shopify rejects a cart change that leaves free samples or a free gift in
+// place once the paid total drops under their threshold. Drop those lines in
+// the same update as the quantity change.
+async function buildQuantityRequest(line, quantity, sections) {
+  const changeRequest = {
+    url: routes.cart_change_url,
+    body: { line, quantity, sections, sections_url: window.location.pathname },
+  };
+  const sampleEl = document.querySelector('cart-free-sample');
+  const giftEl = document.querySelector('cart-free-gift');
+  const sampleEnabled = sampleEl?.dataset.enabled === 'true';
+  const giftEnabled = giftEl?.dataset.enabled === 'true';
+  const sampleThreshold = Number(sampleEl?.dataset.threshold) || 0;
+  const giftThreshold = Number(giftEl?.dataset.threshold) || 0;
+  if ((!sampleEnabled || !sampleThreshold) && (!giftEnabled || !giftThreshold)) return changeRequest;
+
+  let cart;
+  try {
+    const response = await fetch(`${routes.cart_url}.js`);
+    if (!response.ok) return changeRequest;
+    cart = await response.json();
+  } catch (error) {
+    console.error(error);
+    return changeRequest;
+  }
+
+  const lineItem = cart.items[Number(line) - 1];
+  if (!lineItem) return changeRequest;
+
+  const sampleIds = new Set(
+    String(sampleEl?.dataset.variantIds || '')
+      .split(',')
+      .map((id) => Number(id.trim()))
+      .filter(Boolean)
+  );
+  const giftVariantId = Number(giftEl?.dataset.variantId) || 0;
+  const isSample = (item) =>
+    item.properties?._sample === 'true' || sampleIds.has(Number(item.variant_id));
+  const isGift = (item) =>
+    item.properties?._gift === 'true' || (giftVariantId > 0 && Number(item.variant_id) === giftVariantId);
+
+  const nextQuantity = Number(quantity);
+  let eligible = 0;
+  for (const item of cart.items) {
+    if (isSample(item) || isGift(item)) continue;
+    const qty = item.key === lineItem.key ? nextQuantity : Number(item.quantity);
+    eligible += Number(item.final_price) * qty;
+  }
+
+  const updates = {};
+  if (sampleEnabled && eligible < sampleThreshold) {
+    for (const item of cart.items) {
+      if (isSample(item)) updates[item.key] = 0;
+    }
+  }
+  if (giftEnabled && eligible < giftThreshold) {
+    for (const item of cart.items) {
+      if (isGift(item)) updates[item.key] = 0;
+    }
+  }
+  if (Object.keys(updates).length === 0) return changeRequest;
+
+  updates[lineItem.key] = nextQuantity;
+  return {
+    url: routes.cart_update_url,
+    body: { updates, sections, sections_url: window.location.pathname },
+  };
+}
+
 const CART_PAIRING_TARGET = 4;
 const CART_PAIRING_SKELETON_ITEM = `
 	<li class="cart-pairing__item cart-pairing__item--skeleton" aria-hidden="true">
@@ -405,15 +474,13 @@ class CartItems extends HTMLElement {
   updateQuantity(line, quantity, event, name, variantId) {
     this.enableLoading(line);
 
-    const body = JSON.stringify({
-      line,
-      quantity,
-      sections: this.getSectionsToRender().map((section) => section.section),
-      sections_url: window.location.pathname,
-    });
+    const sections = this.getSectionsToRender().map((section) => section.section);
     const eventTarget = event.currentTarget instanceof CartRemoveButton ? 'clear' : 'change';
 
-    fetch(`${routes.cart_change_url}`, { ...fetchConfig(), ...{ body } })
+    buildQuantityRequest(line, quantity, sections)
+      .then((request) =>
+        fetch(request.url, { ...fetchConfig(), body: JSON.stringify(request.body) })
+      )
       .then((response) => {
         return response.text();
       })

@@ -87,11 +87,12 @@ function motionOff() {
 	);
 }
 
-function stripDawn(element) {
+function stripDawn(element, boundary) {
 	let node = element;
 	while (node && node !== document.body) {
 		node.classList.remove(...DAWN_MOTION_CLASSES);
 		node.style.removeProperty("--animation-order");
+		if (node === boundary) break;
 		node = node.parentElement;
 	}
 }
@@ -114,7 +115,7 @@ function reveal(elements, trigger) {
 
 	elements.forEach((element) => {
 		element.dataset.motionReady = "true";
-		stripDawn(element);
+		stripDawn(element, trigger);
 	});
 
 	gsap.from(elements, {
@@ -151,7 +152,17 @@ function watch(selector) {
 	document.querySelectorAll(selector).forEach((node) => {
 		if (node.dataset.motionWatch === "true") return;
 		node.dataset.motionWatch = "true";
-		const observer = new MutationObserver(() => initScrollReveal(node));
+		let frame = 0;
+		const observer = new MutationObserver((mutations) => {
+			const added = mutations.some((mutation) =>
+				[...mutation.addedNodes].some(
+					(addedNode) => addedNode.nodeType === Node.ELEMENT_NODE,
+				),
+			);
+			if (!added) return;
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(() => initScrollReveal(node));
+		});
 		observer.observe(node, { childList: true, subtree: true });
 	});
 }

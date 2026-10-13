@@ -7,8 +7,40 @@ function motionOff() {
 	);
 }
 
+const INDEX_ATTRS = [
+	"id",
+	"for",
+	"data-index",
+	"aria-controls",
+	"aria-labelledby",
+	"aria-describedby",
+];
+
 function rowKey(row) {
 	return row.getAttribute("data-cart-line");
+}
+
+function normalizedHtml(html) {
+	return html
+		.replace(
+			/\b(CartItem|CartDrawer-Item|Quantity|Drawer-quantity|Remove|CartDrawer-Remove|Line-item-error|CartDrawer-LineItemError)-\d+/g,
+			"$1-",
+		)
+		.replace(/data-index="\d+"/g, 'data-index=""')
+		.replace(/(?:https?:)?\/\/[^/"'\s]+(?=\/cdn\/)/g, "");
+}
+
+function syncIndexes(from, to) {
+	INDEX_ATTRS.forEach((name) => {
+		if (!from.hasAttribute?.(name)) return;
+		to.setAttribute(name, from.getAttribute(name));
+	});
+	const fromChildren = [...from.children];
+	const toChildren = [...to.children];
+	if (fromChildren.length !== toChildren.length) return false;
+	return fromChildren.every((child, index) =>
+		syncIndexes(child, toChildren[index]),
+	);
 }
 
 function copyAttributes(from, to) {
@@ -158,7 +190,14 @@ function syncKeyedChildren(liveParent, nextParent) {
 
 		if (existing && existing.isConnected && !leavingSet.has(existing)) {
 			copyAttributes(nextChild, existing);
-			if (existing.innerHTML !== nextChild.innerHTML) {
+			if (
+				normalizedHtml(existing.innerHTML) ===
+				normalizedHtml(nextChild.innerHTML)
+			) {
+				if (!syncIndexes(nextChild, existing)) {
+					existing.innerHTML = nextChild.innerHTML;
+				}
+			} else {
 				existing.innerHTML = nextChild.innerHTML;
 			}
 			if (anchor !== existing) liveParent.insertBefore(existing, anchor);
