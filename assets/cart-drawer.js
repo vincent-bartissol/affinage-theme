@@ -80,6 +80,16 @@ class CartDrawer extends HTMLElement {
         : document.getElementById(section.id);
 
       if (!sectionElement) return;
+
+      if (section.id === 'cart-drawer') {
+        const doc = new DOMParser().parseFromString(parsedState.sections[section.id], 'text/html');
+        const incoming = doc.querySelector(section.selector);
+        if (!incoming) return;
+        preserveCartPairingPanels(sectionElement, incoming);
+        sectionElement.replaceChildren(...incoming.childNodes);
+        return;
+      }
+
       sectionElement.innerHTML = this.getSectionInnerHTML(parsedState.sections[section.id], section.selector);
     });
 

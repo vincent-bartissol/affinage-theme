@@ -59,6 +59,131 @@ class CartRemoveButton extends HTMLElement {
 
 customElements.define('cart-remove-button', CartRemoveButton);
 
+const CART_PAIRING_TARGET = 4;
+const CART_PAIRING_SKELETON_ITEM = `
+	<li class="cart-pairing__item cart-pairing__item--skeleton" aria-hidden="true">
+		<span class="cart-pairing__media"></span>
+		<span class="cart-pairing__meta">
+			<span class="cart-pairing__skeleton-name"></span>
+			<span class="cart-pairing__skeleton-price"></span>
+			<span class="cart-pairing__skeleton-cta"></span>
+		</span>
+	</li>
+`;
+
+function createCartPairingSkeleton(slotHeight) {
+  const template = document.createElement('template');
+  template.innerHTML = CART_PAIRING_SKELETON_ITEM.trim();
+  const skeleton = template.content.firstElementChild;
+  if (slotHeight > 0) {
+    applyCartPairingSlotHeight(skeleton, slotHeight);
+  }
+  return skeleton;
+}
+
+function applyCartPairingSlotHeight(element, slotHeight) {
+  if (!element || !(slotHeight > 0)) return;
+  const rounded = Math.round(slotHeight);
+  const height = `${rounded}px`;
+  element.dataset.slotHeight = String(rounded);
+  element.style.boxSizing = 'border-box';
+  element.style.minHeight = height;
+}
+
+// Lock card height before the add-to-cart spinner can shrink the slot.
+document.addEventListener(
+  'submit',
+  (event) => {
+    const item = event.target?.closest?.('.cart-pairing__item');
+    if (!item || item.classList.contains('cart-pairing__item--skeleton')) return;
+    applyCartPairingSlotHeight(item, item.getBoundingClientRect().height);
+  },
+  true
+);
+
+/**
+ * Keep four pairing slots while refill loads: swap in-cart cards for skeletons,
+ * then re-fetch recommendations. `cartRoot` should reflect the updated cart lines.
+ */
+function syncCartPairingPanel(panel, cartRoot = document) {
+  const recs = panel?.querySelector('product-recommendations');
+  if (!recs?.classList.contains('product-recommendations--loaded')) return false;
+
+  const inCartVariantIds = new Set(
+    Array.from(cartRoot.querySelectorAll('[data-quantity-variant-id]'))
+      .map((el) => el.getAttribute('data-quantity-variant-id'))
+      .filter(Boolean)
+  );
+
+  let needsRefill = false;
+  recs.querySelectorAll('.cart-pairing__item:not(.cart-pairing__item--skeleton)').forEach((item) => {
+    const variantId = item.querySelector('[name="id"], .product-variant-id')?.value;
+    if (variantId && inCartVariantIds.has(String(variantId))) {
+      const height = item.getBoundingClientRect().height;
+      // Prefer pre-loading height when available so the loading spinner does not shrink the slot.
+      const locked =
+        Number(item.dataset.slotHeight) ||
+        height;
+      item.replaceWith(createCartPairingSkeleton(locked));
+      needsRefill = true;
+    }
+  });
+
+  const list = recs.querySelector('.cart-pairing__list');
+  if (list) {
+    while (list.querySelectorAll('.cart-pairing__item').length < CART_PAIRING_TARGET) {
+      list.appendChild(createCartPairingSkeleton());
+      needsRefill = true;
+    }
+  }
+
+  panel.removeAttribute('hidden');
+  recs.removeAttribute('hidden');
+
+  if (!needsRefill) return true;
+
+  const pairing = recs.querySelector('.cart-pairing');
+  if (pairing) {
+    pairing.classList.add('cart-pairing--pending');
+    pairing.setAttribute('aria-busy', 'true');
+  }
+
+  delete recs.dataset.fallbackAttempted;
+  if (typeof recs.loadRecommendations === 'function') {
+    recs.loadRecommendations(recs.dataset.productId);
+  }
+
+  return true;
+}
+
+/**
+ * Keep loaded pairing panels when the seed product is unchanged so the
+ * skeleton markup does not flash and resize the aside during cart refresh.
+ */
+function preserveCartPairingPanels(currentRoot, incomingRoot) {
+  if (!currentRoot || !incomingRoot) return;
+
+  const currentPanels = currentRoot.querySelectorAll('[data-cart-pairing]');
+  const incomingPanels = incomingRoot.querySelectorAll('[data-cart-pairing]');
+
+  currentPanels.forEach((currentPanel, index) => {
+    const incomingPanel = incomingPanels[index];
+    if (!incomingPanel) return;
+
+    const currentRecs = currentPanel.querySelector('product-recommendations');
+    const incomingRecs = incomingPanel.querySelector('product-recommendations');
+    const sameProduct =
+      currentRecs?.dataset.productId &&
+      currentRecs.dataset.productId === incomingRecs?.dataset.productId;
+    const isLoaded = currentRecs?.classList.contains('product-recommendations--loaded');
+
+    if (!sameProduct || !isLoaded) return;
+
+    incomingPanel.replaceWith(currentPanel);
+    syncCartPairingPanel(currentPanel, incomingRoot);
+  });
+}
+
 class CartItems extends HTMLElement {
   constructor() {
     super();
@@ -150,9 +275,25 @@ class CartItems extends HTMLElement {
 						const sourceElements = html.querySelectorAll(selector);
 						targetElements.forEach((targetElement, index) => {
 							const sourceElement = sourceElements[index];
-							if (targetElement && sourceElement) {
-								targetElement.replaceWith(sourceElement);
+							if (!targetElement || !sourceElement) return;
+
+							if (selector === '[data-cart-pairing]') {
+								const currentRecs = targetElement.querySelector('product-recommendations');
+								const nextRecs = sourceElement.querySelector('product-recommendations');
+								const sameProduct =
+									currentRecs?.dataset.productId &&
+									currentRecs.dataset.productId === nextRecs?.dataset.productId;
+								const isLoaded = currentRecs?.classList.contains(
+									'product-recommendations--loaded'
+								);
+
+								if (sameProduct && isLoaded) {
+									syncCartPairingPanel(targetElement);
+									return;
+								}
 							}
+
+							targetElement.replaceWith(sourceElement);
 						});
           }
         })
@@ -254,6 +395,20 @@ class CartItems extends HTMLElement {
           this.getSectionsToRender().forEach((section) => {
             const elementToReplace =
               document.getElementById(section.id).querySelector(section.selector) || document.getElementById(section.id);
+            if (!elementToReplace) return;
+
+            if (section.selector === '.cart-drawer__shell') {
+              const doc = new DOMParser().parseFromString(
+                parsedState.sections[section.section],
+                'text/html'
+              );
+              const incomingShell = doc.querySelector('.cart-drawer__shell');
+              if (!incomingShell) return;
+              preserveCartPairingPanels(elementToReplace, incomingShell);
+              elementToReplace.replaceWith(incomingShell);
+              return;
+            }
+
             elementToReplace.innerHTML = this.getSectionInnerHTML(
               parsedState.sections[section.section],
               section.selector
