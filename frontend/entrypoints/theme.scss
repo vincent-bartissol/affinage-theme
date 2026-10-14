@@ -250,8 +250,9 @@ cart-drawer.drawer.active {
 	gap: 1rem;
 }
 
-/* Swiper's global .swiper-slide width/height should not affect the desktop stack. */
+/* Swiper's .swiper-slide { display: block } would drop the grid gap between image and name. */
 .cart-pairing__list:not(.swiper-wrapper) > .cart-pairing__item {
+	display: grid;
 	width: auto;
 	height: auto;
 }
