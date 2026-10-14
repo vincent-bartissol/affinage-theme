@@ -130,7 +130,7 @@ async function buildQuantityRequest(line, quantity, sections) {
 
 const CART_PAIRING_TARGET = 4;
 const CART_PAIRING_SKELETON_ITEM = `
-	<li class="cart-pairing__item cart-pairing__item--skeleton" aria-hidden="true">
+	<li class="cart-pairing__item cart-pairing__item--skeleton swiper-slide" aria-hidden="true">
 		<span class="cart-pairing__media"></span>
 		<span class="cart-pairing__meta">
 			<span class="cart-pairing__skeleton-name"></span>

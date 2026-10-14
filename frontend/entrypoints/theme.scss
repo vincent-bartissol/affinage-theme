@@ -250,6 +250,46 @@ cart-drawer.drawer.active {
 	gap: 1rem;
 }
 
+/* Swiper's global .swiper-slide width/height should not affect the desktop stack. */
+.cart-pairing__list:not(.swiper-wrapper) > .cart-pairing__item {
+	width: auto;
+	height: auto;
+}
+
+.cart-pairing__slider {
+	overflow: hidden;
+	margin: 0;
+
+	.cart-pairing__list {
+		display: flex;
+		gap: 0;
+		padding-top: 0;
+	}
+
+	.cart-pairing__item,
+	.swiper-slide {
+		display: grid;
+		height: auto;
+	}
+
+	.swiper-pagination {
+		position: static;
+		margin-top: 0.8rem;
+		line-height: 0;
+	}
+
+	.swiper-pagination-bullet {
+		width: 0.6rem;
+		height: 0.6rem;
+		background: rgb(var(--color-foreground));
+		opacity: 0.28;
+	}
+
+	.swiper-pagination-bullet-active {
+		opacity: 1;
+	}
+}
+
 .cart-pairing-aside .cart-pairing__list {
 	gap: 1.15rem;
 	padding-top: 0.25rem;

@@ -136,5 +136,77 @@ class HeroBackgroundSlider extends HTMLElement {
 	}
 }
 
+class CartPairingSlider extends HTMLElement {
+	constructor() {
+		super();
+		this.swiper = null;
+		this.lastWidth = 0;
+	}
+
+	connectedCallback() {
+		this.wrapper = this.querySelector(".swiper-wrapper");
+		this.onResize = () => this.mountIfVisible();
+		this.resizeObserver = new ResizeObserver(this.onResize);
+		this.resizeObserver.observe(this);
+
+		if (this.wrapper) {
+			this.slidesObserver = new MutationObserver(() =>
+				this.scheduleSlidesUpdate(),
+			);
+			this.slidesObserver.observe(this.wrapper, { childList: true });
+		}
+
+		this.mountIfVisible();
+	}
+
+	disconnectedCallback() {
+		this.resizeObserver?.disconnect();
+		this.slidesObserver?.disconnect();
+		if (this.frame) cancelAnimationFrame(this.frame);
+		this.destroySwiper();
+	}
+
+	mountIfVisible() {
+		const width = this.clientWidth;
+		if (width === 0) return;
+
+		if (!this.swiper) {
+			this.swiper = initSwiper(this, {
+				direction: "horizontal",
+				slidesPerView: 1.15,
+				spaceBetween: 12,
+				watchOverflow: true,
+			});
+			this.lastWidth = width;
+			return;
+		}
+
+		if (this.lastWidth !== width) {
+			this.lastWidth = width;
+			this.swiper.update();
+		}
+	}
+
+	scheduleSlidesUpdate() {
+		if (this.frame) cancelAnimationFrame(this.frame);
+		this.frame = requestAnimationFrame(() => {
+			this.frame = 0;
+			if (!this.swiper) {
+				this.mountIfVisible();
+				return;
+			}
+			this.swiper.update();
+		});
+	}
+
+	destroySwiper() {
+		if (!this.swiper) return;
+		this.swiper.destroy(true, true);
+		this.swiper = null;
+		this.lastWidth = 0;
+	}
+}
+
 customElements.define("slider-products", Slider);
 customElements.define("hero-background-slider", HeroBackgroundSlider);
+customElements.define("cart-pairing-slider", CartPairingSlider);

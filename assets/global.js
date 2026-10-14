@@ -1180,7 +1180,8 @@ class ProductRecommendations extends HTMLElement {
         const hasContent = Boolean(recommendations?.innerHTML.trim().length);
 
         if (hasContent) {
-					if (this.querySelector('.cart-pairing__item--skeleton')) {
+					// Keep the cart pairing list node so a Swiper wrapper survives the refill.
+					if (this.querySelector(".cart-pairing__list")) {
 						this.mergeCartPairingSlots(recommendations);
 					} else {
 						this.innerHTML = recommendations.innerHTML;
@@ -1232,6 +1233,18 @@ class ProductRecommendations extends HTMLElement {
       this.innerHTML = source.innerHTML;
       return;
     }
+
+    const skeletons = list.querySelectorAll(".cart-pairing__item--skeleton");
+		if (skeletons.length === 0) {
+			const items = Array.from(source.querySelectorAll(".cart-pairing__item"));
+			if (items.length > 0) {
+				list.replaceChildren(...items);
+			}
+			const pairing = this.querySelector(".cart-pairing");
+			pairing?.classList.remove("cart-pairing--pending");
+			pairing?.removeAttribute("aria-busy");
+			return;
+		}
 
     const keptVariantIds = new Set(
       Array.from(
