@@ -15,6 +15,10 @@ class CartFreeSample extends HTMLElement {
 		this.giftVariantId = Number(this.dataset.giftVariantId) || 0;
 		this.busy = false;
 		this.pendingSync = false;
+		this.pending = false;
+		this.pendingVariantId = 0;
+		this.lastSelectedIds = [];
+		this.pickerObserver = null;
 
 		if (!this.enabled || !this.threshold || this.variantIds.length === 0) {
 			return;
@@ -34,6 +38,7 @@ class CartFreeSample extends HTMLElement {
 
 	disconnectedCallback() {
 		document.removeEventListener("click", this.onDocumentClick);
+		this.stopPickerObserver();
 		if (this.unsubscribe) {
 			this.unsubscribe();
 			this.unsubscribe = null;
@@ -44,6 +49,13 @@ class CartFreeSample extends HTMLElement {
 		const addButton = event.target.closest("[data-free-sample-add]");
 		if (addButton) {
 			event.preventDefault();
+			if (this.pending || this.busy) return;
+			if (
+				addButton.disabled ||
+				addButton.getAttribute("aria-disabled") === "true"
+			) {
+				return;
+			}
 			const variantId = Number(addButton.dataset.freeSampleAdd);
 			if (variantId) this.addSample(variantId);
 			return;
@@ -52,6 +64,13 @@ class CartFreeSample extends HTMLElement {
 		const removeButton = event.target.closest("[data-free-sample-remove]");
 		if (removeButton) {
 			event.preventDefault();
+			if (this.pending || this.busy) return;
+			if (
+				removeButton.disabled ||
+				removeButton.getAttribute("aria-disabled") === "true"
+			) {
+				return;
+			}
 			const variantId = Number(removeButton.dataset.freeSampleRemove);
 			if (variantId) this.removeSample(variantId);
 		}
@@ -136,6 +155,70 @@ class CartFreeSample extends HTMLElement {
 		return a.every((id, index) => id === b[index]);
 	}
 
+	startPickerObserver() {
+		if (this.pickerObserver || typeof MutationObserver === "undefined") return;
+
+		this.pickerObserver = new MutationObserver(() => {
+			if (!this.pending) return;
+			this.applyPendingUi();
+		});
+		this.pickerObserver.observe(document.body, {
+			childList: true,
+			subtree: true,
+		});
+	}
+
+	stopPickerObserver() {
+		if (!this.pickerObserver) return;
+		this.pickerObserver.disconnect();
+		this.pickerObserver = null;
+	}
+
+	setPending(variantId) {
+		this.pending = true;
+		this.pendingVariantId = variantId;
+		this.startPickerObserver();
+		this.applyPendingUi();
+	}
+
+	clearPending() {
+		this.pending = false;
+		this.pendingVariantId = 0;
+		this.stopPickerObserver();
+	}
+
+	applyPendingUi() {
+		const pending = this.pending;
+		const pendingVariantId = this.pendingVariantId;
+
+		document.querySelectorAll(".cart-free-sample").forEach((picker) => {
+			if (pending) {
+				picker.setAttribute("aria-busy", "true");
+			} else {
+				picker.removeAttribute("aria-busy");
+			}
+		});
+
+		document
+			.querySelectorAll("[data-free-sample-add], [data-free-sample-remove]")
+			.forEach((button) => {
+				const variantId = Number(
+					button.dataset.freeSampleAdd || button.dataset.freeSampleRemove,
+				);
+				const isPendingButton = pending && variantId === pendingVariantId;
+				const spinner = button.querySelector(".loading__spinner");
+
+				if (pending) {
+					button.setAttribute("aria-disabled", "true");
+				}
+
+				button.classList.toggle("loading", isPendingButton);
+				if (spinner) {
+					spinner.classList.toggle("hidden", !isPendingButton);
+				}
+			});
+	}
+
 	async sync(cartFromEvent) {
 		if (!this.enabled) return;
 
@@ -186,6 +269,7 @@ class CartFreeSample extends HTMLElement {
 	}
 
 	refreshPicker(selectedIds) {
+		this.lastSelectedIds = selectedIds.slice();
 		const selected = new Set(selectedIds);
 		const atMax = selectedIds.length >= this.max;
 
@@ -207,9 +291,16 @@ class CartFreeSample extends HTMLElement {
 			if (addButton) {
 				addButton.hidden = isSelected;
 				addButton.disabled = isDisabled;
+				if (!this.pending) {
+					addButton.removeAttribute("aria-disabled");
+				}
 			}
 			if (removeButton) {
 				removeButton.hidden = !isSelected;
+				if (!this.pending) {
+					removeButton.removeAttribute("aria-disabled");
+					removeButton.disabled = false;
+				}
 			}
 		});
 
@@ -222,11 +313,15 @@ class CartFreeSample extends HTMLElement {
 			.forEach((element) => {
 				element.hidden = !atMax;
 			});
+
+		this.applyPendingUi();
 	}
 
 	async addSample(variantId) {
 		if (!this.enabled || !this.variantIdSet.has(variantId)) return;
+		if (this.pending || this.busy) return;
 
+		this.setPending(variantId);
 		try {
 			const cart = await this.fetchCart();
 			if (this.getEligibleTotal(cart) < this.threshold) return;
@@ -244,12 +339,23 @@ class CartFreeSample extends HTMLElement {
 			await this.addSamples([variantId]);
 		} catch (error) {
 			console.error("Failed to add free sample", error);
+			try {
+				const cart = await this.fetchCart();
+				this.refreshPicker(this.getSampleVariantIds(cart));
+			} catch (refreshError) {
+				console.error("Failed to refresh free sample picker", refreshError);
+			}
+		} finally {
+			this.clearPending();
+			this.refreshPicker(this.lastSelectedIds);
 		}
 	}
 
 	async removeSample(variantId) {
 		if (!this.enabled || !this.variantIdSet.has(variantId)) return;
+		if (this.pending || this.busy) return;
 
+		this.setPending(variantId);
 		try {
 			const cart = await this.fetchCart();
 			const nextIds = this.getSampleVariantIds(cart).filter(
@@ -261,6 +367,15 @@ class CartFreeSample extends HTMLElement {
 			await this.setSampleQuantities([variantId], 0);
 		} catch (error) {
 			console.error("Failed to remove free sample", error);
+			try {
+				const cart = await this.fetchCart();
+				this.refreshPicker(this.getSampleVariantIds(cart));
+			} catch (refreshError) {
+				console.error("Failed to refresh free sample picker", refreshError);
+			}
+		} finally {
+			this.clearPending();
+			this.refreshPicker(this.lastSelectedIds);
 		}
 	}
 
