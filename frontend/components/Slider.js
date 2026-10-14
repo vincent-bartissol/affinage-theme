@@ -150,9 +150,26 @@ class CartPairingSlider extends HTMLElement {
 		this.resizeObserver.observe(this);
 
 		if (this.wrapper) {
-			this.slidesObserver = new MutationObserver(() =>
-				this.scheduleSlidesUpdate(),
-			);
+			this.slidesObserver = new MutationObserver((mutations) => {
+				if (this.refreshing) return;
+				const added = new Set();
+				const removed = [];
+				mutations.forEach((mutation) => {
+					mutation.addedNodes.forEach((node) => {
+						if (this.isRealSlide(node)) added.add(node);
+					});
+					mutation.removedNodes.forEach((node) => {
+						if (this.isRealSlide(node)) removed.push(node);
+					});
+				});
+				// Swiper reorders slides while looping. Only rebuild when a card is
+				// actually added or removed, not when an existing card moves.
+				const moved = new Set(removed.filter((node) => added.has(node)));
+				const structural =
+					removed.some((node) => !moved.has(node)) ||
+					[...added].some((node) => !moved.has(node));
+				if (structural) this.scheduleSlidesUpdate();
+			});
 			this.slidesObserver.observe(this.wrapper, { childList: true });
 		}
 
@@ -171,12 +188,20 @@ class CartPairingSlider extends HTMLElement {
 		if (width === 0) return;
 
 		if (!this.swiper) {
+			const realSlides = this.wrapper
+				? this.wrapper.querySelectorAll(
+						".swiper-slide:not(.swiper-slide-duplicate)",
+					).length
+				: 0;
 			this.swiper = initSwiper(this, {
 				direction: "horizontal",
 				slidesPerView: 1.15,
 				spaceBetween: 12,
-				watchOverflow: true,
+				loop: realSlides > 1,
+				loopAdditionalSlides: 2,
+				watchOverflow: realSlides <= 1,
 			});
+			this.uniquifyLoopClones();
 			this.lastWidth = width;
 			return;
 		}
@@ -184,6 +209,7 @@ class CartPairingSlider extends HTMLElement {
 		if (this.lastWidth !== width) {
 			this.lastWidth = width;
 			this.swiper.update();
+			this.uniquifyLoopClones();
 		}
 	}
 
@@ -191,11 +217,28 @@ class CartPairingSlider extends HTMLElement {
 		if (this.frame) cancelAnimationFrame(this.frame);
 		this.frame = requestAnimationFrame(() => {
 			this.frame = 0;
-			if (!this.swiper) {
-				this.mountIfVisible();
-				return;
-			}
-			this.swiper.update();
+			this.refreshing = true;
+			this.destroySwiper();
+			this.mountIfVisible();
+			queueMicrotask(() => {
+				this.refreshing = false;
+			});
+		});
+	}
+
+	isRealSlide(node) {
+		return (
+			node?.nodeType === Node.ELEMENT_NODE &&
+			node.classList.contains("swiper-slide") &&
+			!node.classList.contains("swiper-slide-duplicate")
+		);
+	}
+
+	uniquifyLoopClones() {
+		this.querySelectorAll(".swiper-slide-duplicate").forEach((slide, index) => {
+			slide.querySelectorAll("[id]").forEach((element) => {
+				element.id = `${element.id}-loop-${index}`;
+			});
 		});
 	}
 
