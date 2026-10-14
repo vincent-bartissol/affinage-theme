@@ -522,7 +522,7 @@
 				<div class="drawer__footer">
 					{%- if cart != empty -%}
 						<div class="cart-pairing-footer large-up-hide" data-cart-pairing>
-							{% render 'cart-pairing' %}
+							{% render 'cart-pairing', layout: 'slider' %}
 						</div>
 					{%- endif -%}
 					{%- if settings.show_cart_note -%}

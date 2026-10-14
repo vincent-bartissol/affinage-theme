@@ -25,6 +25,13 @@
 -%}
 
 {%- if seed_product != blank -%}
+	{%- liquid
+		assign pairing_layout = layout | default: 'stack'
+		assign pairing_is_slider = false
+		if pairing_layout == 'slider'
+			assign pairing_is_slider = true
+		endif
+	-%}
 	<product-recommendations
 		class="cart-pairing-recommendations"
 		data-url="{{ routes.product_recommendations_url }}?section_id=cart-pairing-recommendations&limit=4&intent=complementary"
@@ -36,9 +43,20 @@
 	>
 		<div class="cart-pairing cart-pairing--pending" aria-busy="true">
 			<p class="cart-pairing__title">{{ 'sections.cart.pairing_title' | t }}</p>
-			<ul class="cart-pairing__list" role="list">
+			{%- if pairing_is_slider -%}
+				<cart-pairing-slider
+					class="cart-pairing__slider swiper"
+					data-pagination="true"
+					data-navigation="false"
+					data-scrollbar="false"
+				>
+			{%- endif -%}
+			<ul class="cart-pairing__list{% if pairing_is_slider %} swiper-wrapper{% endif %}" role="list">
 				{%- for i in (1..4) -%}
-					<li class="cart-pairing__item cart-pairing__item--skeleton" aria-hidden="true">
+					<li
+						class="cart-pairing__item cart-pairing__item--skeleton{% if pairing_is_slider %} swiper-slide{% endif %}"
+						aria-hidden="true"
+					>
 						<span class="cart-pairing__media"></span>
 						<span class="cart-pairing__meta">
 							<span class="cart-pairing__skeleton-name"></span>
@@ -48,6 +66,10 @@
 					</li>
 				{%- endfor -%}
 			</ul>
+			{%- if pairing_is_slider -%}
+				<div class="swiper-pagination"></div>
+				</cart-pairing-slider>
+			{%- endif -%}
 		</div>
 	</product-recommendations>
 {%- endif -%}

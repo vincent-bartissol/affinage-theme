@@ -64,7 +64,15 @@
 			</p>
 		</div>
 
-		<ul class="cart-free-sample__list" role="list">
+		{%- if sample_layout == 'drawer' -%}
+			<cart-free-sample-slider
+				class="cart-free-sample__slider swiper"
+				data-pagination="true"
+				data-navigation="false"
+				data-scrollbar="false"
+			>
+		{%- endif -%}
+		<ul class="cart-free-sample__list{% if sample_layout == 'drawer' %} swiper-wrapper{% endif %}" role="list">
 			{%- for product in sample_collection.products -%}
 				{%- liquid
 					assign variant = product.selected_or_first_available_variant
@@ -93,7 +101,7 @@
 					endif
 				-%}
 				<li
-					class="cart-free-sample__option{% if is_selected %} is-selected{% endif %}{% if is_disabled %} is-disabled{% endif %}"
+					class="cart-free-sample__option{% if sample_layout == 'drawer' %} swiper-slide{% endif %}{% if is_selected %} is-selected{% endif %}{% if is_disabled %} is-disabled{% endif %}"
 					data-variant-id="{{ variant.id }}"
 					{% if is_disabled %}
 						aria-disabled="true"
@@ -148,5 +156,9 @@
 				</li>
 			{%- endfor -%}
 		</ul>
+		{%- if sample_layout == 'drawer' -%}
+			<div class="swiper-pagination"></div>
+			</cart-free-sample-slider>
+		{%- endif -%}
 	</div>
 {%- endif -%}
