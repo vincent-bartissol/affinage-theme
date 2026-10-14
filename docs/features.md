@@ -60,6 +60,16 @@ Dev store seed script: [`scripts/create-free-samples.mjs`](../scripts/create-fre
 
 Samples are added with line property `_sample: true`.
 
+### Layout
+
+| Surface | Presentation |
+| --- | --- |
+| Cart page | Vertical list (`layout: 'page'`) |
+| Cart drawer, 990px and up | Vertical list. Slider markup is present, but Swiper does not start |
+| Cart drawer, up to 989px | Swiper slider: one sample, a peek of the next, pagination dots, and a loop when more than one sample is available |
+
+The drawer slider is `cart-free-sample-slider` in [`frontend/components/Slider.js`](../frontend/components/Slider.js). It only initializes at `max-width: 989px`.
+
 ## Free gift
 
 When the cart reaches the gift threshold, a configured product is auto-added (qty 1). Removing it sets `free_gift_declined` so it stays off until the customer uses “Add free gift again” or the cart drops below the threshold (which clears the decline flag).
@@ -75,7 +85,10 @@ Gift product pages use the `free-gift` tag and redirect home. Keep a real catalo
 ## Free shipping progress and pairing
 
 - Progress bar: [`snippets/cart-shipping-progress.liquid`](../snippets/cart-shipping-progress.liquid)
-- Pairing suggestions in the drawer: [`snippets/cart-pairing.liquid`](../snippets/cart-pairing.liquid) + [`sections/cart-pairing-recommendations.liquid`](../sections/cart-pairing-recommendations.liquid) — Shopify complementary recommendations (Search & Discovery), with related-product fallback; panel sits beside the drawer on large screens
+- Pairing suggestions: [`snippets/cart-pairing.liquid`](../snippets/cart-pairing.liquid) + [`sections/cart-pairing-recommendations.liquid`](../sections/cart-pairing-recommendations.liquid) — Shopify complementary recommendations (Search & Discovery), with a related-product fallback
+- Desktop drawer (990px and up): a vertical stack in a panel beside the drawer (`cart-pairing-aside`)
+- Mobile and tablet drawer (up to 989px): a looping Swiper slider in the drawer footer (`layout: 'slider'`, `cart-pairing-slider` in [`frontend/components/Slider.js`](../frontend/components/Slider.js)). One card, a peek of the next, and pagination dots. The footer block is hidden at 990px and up
+- Desktop cards stay `display: grid`, so Swiper’s `.swiper-slide { display: block }` does not remove the gap between the picture and the product name
 
 ## Announcement bar
 
