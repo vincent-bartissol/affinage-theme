@@ -131,6 +131,7 @@
 							{% endif %}
 						>
 							{{ 'sections.cart.free_sample_add' | t }}
+							{%- render 'loading-spinner' -%}
 						</button>
 						<button
 							type="button"
@@ -141,6 +142,7 @@
 							{% endunless %}
 						>
 							{{ 'sections.cart.free_sample_remove' | t }}
+							{%- render 'loading-spinner' -%}
 						</button>
 					</div>
 				</li>
