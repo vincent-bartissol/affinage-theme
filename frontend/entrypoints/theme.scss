@@ -28,6 +28,11 @@
 	box-sizing: border-box;
 }
 
+/* Tailwind svg { display: block } misaligns the selected checkmark in localization lists. */
+.disclosure__link {
+	align-items: center;
+}
+
 /* Controllers render before the header group; keep them out of document flow. */
 cart-free-gift,
 cart-free-sample {
