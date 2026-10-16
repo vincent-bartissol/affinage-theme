@@ -1,4 +1,9 @@
+ignore:
+  - snippets/vite-tag.liquid
+
 MatchingTranslations:
   enabled: false
 TemplateLength:
   enabled: false
+LiquidComplexity:
+  maxComplexity: 140

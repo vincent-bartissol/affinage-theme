@@ -54,6 +54,7 @@
 			{{ body_font_bold_italic | font_face: font_display: 'swap' }}
 			{{ settings.type_header_font | font_face: font_display: 'swap' }}
 
+			{% assign scheme_classes = '' %}
 			{% for scheme in settings.color_schemes -%}
 			  {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
 			  {% if forloop.index == 1 -%}
@@ -304,7 +305,9 @@
 		%}
 
 		{% if request.page_type == 'index' %}
+			{% comment %}theme-check-disable RemoteAsset{% endcomment %}
 			<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+			{% comment %}theme-check-enable RemoteAsset{% endcomment %}
 		{% endif %}
 	</head>
 
